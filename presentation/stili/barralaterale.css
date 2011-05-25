@@ -1,0 +1,80 @@
+body{
+background:#FFF;
+color: #FFF;
+font:80% Verdana, Arial,Geneva, Helvetica,sans-serif;
+margin:  1em 0;
+padding: 0;
+}
+
+
+#barrasx
+{
+	border-top: 1px solid #36a5e2; 
+}
+
+ul.barrasx {
+	width: 150px;
+	list-style:none; 
+	margin:0;
+	padding:0; 
+	color: #FFF;
+}
+
+ul.barrasx li a{
+	display:block; 
+	text-decoration:none; 
+	padding:0px 0;
+	height:1.5em;line-height:1.5em; 
+	font-size: 0.65em;
+	font-variant: small-caps;
+	font-weight: bolder;
+	color: #FFF;
+	border-bottom: 1px solid #36a5e2; 
+}
+
+ul.barrasx li {
+	display:inline;
+	color: #FFF;
+
+}
+
+ul.barrasx  li a:link { 
+	background:#08569C;
+	color: #FFF;
+}
+
+ul.barrasx  li a:visited { 
+	color: #FFF;
+}
+
+ul.barrasx  li a:hover { 
+	background: rgb(26,155,198);
+	color: #FFF;
+} 
+
+/* SubMenu */
+ul.barrasx li ul.submenu{
+	padding: 0;
+	margin: 0;
+	background:#06457d;
+	color: #FFF;
+}
+
+ul.barrasx li ul.submenu li {
+	background:#06457d;
+	color: #FFF;
+}
+
+ul.barrasx li ul.submenu li a{
+	background:#06457d;
+	color: #FFF;
+}
+
+ul.barrasx li ul.submenu li a:hover{
+	background:rgb(26,155,198);
+	color: #FFF;
+}
+
+ul.barrasx  li a:visited { 
+	color: #FFF;
+}

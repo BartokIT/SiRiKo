@@ -1,0 +1,29 @@
+<?php
+/**
+* $action variabile che contiene il nome dell'area corrente
+*
+*/
+
+	add_to_debug("Azione",  $action);
+	switch ($action)
+	{
+		default:
+		case "":
+			return new ReturnedPage("default.php");		
+			break;
+		case "login":
+			$password= $_REQUEST["password"];
+			$username= $_REQUEST["username"];
+			
+			if ( (strcmp($username,"admin")==0) && (strcmp(sha1($password),"cffbb03786f3b147892424de5505dd5cbf22c109")==0))
+				return new ReturnedArea("home_admin", "default");
+			else if ( (strcmp($username,"super_admin")==0) && (strcmp(sha1($password),"685fa54931989a3a718fced6b396ebe1f4cfd11d")==0))
+				return new ReturnedArea("super_admin","default"); //"melaccapastorizzata"
+			if ( (strcmp($username,"biblio_admin")==0) && (strcmp(sha1($password),"313c944d300b39949673d128cc558159d12fbaf0")==0))
+				return new ReturnedArea("biblio_admin","default"); //"piantagrassa"				
+			else
+				return new ReturnedArea("public", "default");
+	}
+
+
+?>

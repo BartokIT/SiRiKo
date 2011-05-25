@@ -1,0 +1,295 @@
+
+		var scroller = function (id_scroller, speed)
+		{
+			this.speed= speed;
+			this.id_scroller = id_scroller;
+		}
+		
+		scroller.prototype=
+		{
+			init : function()
+			{
+				id = this.id_scroller;
+			 	//ritrovo il contenitore
+				//se esiste il div allora ne cancello il contenuto, altrimenti lo creo
+			 	if ($('box_sx'))
+				 	$('box_sx').innerHTML='';
+				 else 
+				  {
+					$(id).firstDescendant().hide();	
+					var boxSX = new Element('div', {
+ 								'id': 'box_sx',
+ 								'style':'height:' + $(id).getHeight() + 'px'
+								});
+					$(id).appendChild(boxSX);
+					
+					
+				}
+				
+				
+				//è necessario cancellare le cose già presenti per evitare errori con la cache - FF fix.			 	
+			 	var queue = Effect.Queues.get('vsc');
+			 	queue.each(function(effect){ effect.cancel();});
+
+			 	//prelevo tutti i contenuti			 
+				var pezzi = $$('.piece');
+				var testo = '';
+				var pieceElements1 = new Array();
+				var pieceElements2 = new Array();
+				
+				//prelevo tutti i contenuti e li inserisco in un'array di elementi
+				pezzi.each( function(element, number)
+				{
+				 	pieceElements1[number] = new Element('div', {
+				 						'class':'piece',
+										'style':'width:' + $('box_sx').getWidth+'px;margin:0px'
+											}).update(element.innerHTML);
+				 	pieceElements2[number] = new Element('div', {
+				 						'class':'piece',
+										'style':'width:' + $('box_sx').getWidth+'px;margin:0px'
+											}).update(element.innerHTML);											
+
+				});
+				
+				//creo gli elementi con il testo di classe scroller_content
+				var divUp = new Element('div', {
+				 								'id': 'up',
+				 								'class':'scroller_content',
+												'style':'position:absolute;width:'+ $('box_sx').getWidth+'px;margin:0px;padding:0px;'
+												});
+				var divDown = new Element('div', {
+												'id': 'down',
+				 								'class':'scroller_content',
+												'style':'position:absolute;width:'+ $('box_sx').getWidth+'px;margin:0px;padding:0px;'
+												});
+												
+				pieceElements1.each( function(element, number){
+					divUp.appendChild(pieceElements2[number]);
+					divDown.appendChild(element);
+					//è meglio impostare il margine via JS per evitare problemi di precedenza tra regole Css
+					element.setStyle(
+					{
+						marginBottom: '50px'
+					});
+					pieceElements2[number].
+					setStyle(
+					{
+						marginBottom: '50px'
+					}
+					);
+				});								
+												
+				//Aggiungo allo scroller la prima copia del contenuto che deve essere in posizione top 0px
+				$('box_sx').appendChild(divUp);
+				$('box_sx').appendChild(divDown);
+				divUp.setStyle({'top':'0px'});
+				
+				//Aggiungo allo scroller la seconda copia del contenuto in posizione nascosta al di sopra	
+
+				//Vedo quale è il box più alto
+				if (divUp.getHeight() >  $('box_sx').getHeight())
+					{
+					 divDown.setStyle( {'top':  - divUp.getHeight()   + 'px'} );
+					}
+				else
+					{
+					 divDown.setStyle( {'top': - $('box_sx').getHeight()  + 'px'} );
+					}
+					
+				divUp.absolutize();
+				divDown.absolutize();	
+				this.scroll();
+				
+			},
+			
+			scroll: function()
+			{
+			 	//prelevo gli attuali box per i contenuti e la loro altezza
+				var contenuti = $A($('box_sx').getElementsByClassName('scroller_content'));
+				
+				var height = contenuti.first().getHeight() > $('box_sx').getHeight() ? 
+									contenuti.first().getHeight() : $('box_sx').getHeight();
+
+				//inverto la posizione del contenuto nascosto
+				if ( parseInt(contenuti.first().getStyle('top')) > parseInt(contenuti.last().getStyle('top')) )
+					contenuti.last().setStyle({'top': height + 'px'});
+				else
+					contenuti.first().setStyle({'top': height + 'px'});
+				
+				var blocchetti = $A(contenuti.first().getElementsByClassName('piece'));	
+				var speed = this.speed;
+				var distanza = 0 ;
+				
+				//muovo i blocchetti in parallelo
+				blocchetti.each( function (item, number)
+				{
+					var altezza_blocco =  item.getHeight()
+										 + parseInt(item.getStyle('margin-bottom'))
+										 + parseInt(item.getStyle('margin-top'));
+					 
+					new Effect.Parallel(
+					[
+						new Effect.Move(contenuti.first(), {
+															sync: true,
+						 									x:0,
+															y: -(altezza_blocco),
+															mode:'relative',
+															transition: Effect.Transitions.linear
+															}),
+						new Effect.Move(contenuti.last(), {
+						 									sync: true,
+						 									x:0,
+															y: -(altezza_blocco),
+															mode:'relative',
+															transition: Effect.Transitions.linear
+															})					
+					],
+					{
+					 duration : altezza_blocco/  speed ,
+					 queue:{position:'end',scope:'vsc'},
+
+					 transition: Effect.Transitions.linear,
+					 delay: 1
+					}
+					);
+					//tengo traccia della distanza percorsa
+					distanza += altezza_blocco; 
+				}
+				);
+				
+				var oggetto = this;
+				new Effect.Parallel(
+					[
+						new Effect.Move(contenuti.first(), {
+															sync: true,
+						 									x:0,
+															y: -(height - distanza   ),
+															mode:'relative',
+															transition: Effect.Transitions.linear
+															}),
+						new Effect.Move(contenuti.last(), {
+						 									sync: true,
+						 									x:0,
+															y: -(height - distanza),
+															mode:'relative',
+															transition: Effect.Transitions.linear														
+															})					
+					],
+					{
+					 duration : (height - distanza) /  speed ,
+					 queue:{position:'end',scope:'vsc'}, 
+					 afterFinish: function(effect){oggetto.scroll()},
+					 transition: Effect.Transitions.linear,
+					}
+					);	
+				
+			}
+		};
+		
+
+		var Slider = function (id_contenitore, slide_duration, fade_duration)
+		{
+			//il costruttore preleva tutti i piece
+			this.slide_duration = slide_duration;
+			this.fade_duration = fade_duration;
+			this.id_contenitore = id_contenitore;
+			this.arrayContent = $A($(this.id_contenitore).getElementsByClassName('slider_pieces'));
+			
+			$(this.id_contenitore).setStyle({overflow:"hidden"});
+			
+		 	if ($('hslider'))
+			 	$('hslider').innerHTML='';
+			else 
+			{
+				var hsliderEl = new Element('a', 
+								{
+									'id':'hslider',
+									'style':'height:' + $(id_contenitore).getHeight() + 'px;display:block;'
+								}
+				);
+				$(this.id_contenitore).appendChild(hsliderEl);
+			}			
+
+			$(this.id_contenitore).firstDescendant().hide();
+
+		 	var queue = Effect.Queues.get('hsld');
+		 	queue.each(function(effect){ effect.cancel();});			
+		}
+		
+		Slider.prototype =
+		{
+			slide : function()
+			{
+				slide_duration = this.slide_duration;
+				fade_duration = this.fade_duration;
+				
+				this.arrayContent.each(function(element, number)
+				{
+					
+				 
+					new Effect.Morph
+					(
+					'hslider',
+					{
+					 style : 
+						{
+							color : "#002050"
+						},
+						 queue:{position:'end',scope:'hsld'},
+						 duration: 0.1,
+						 afterFinish: function(effect) {
+					 	 $('hslider').update(element.innerHTML);
+					 	 $('hslider').writeAttribute('href', element.readAttribute('href') );
+					 	 $('hslider').writeAttribute('onclick', element.readAttribute('onclick') )	
+					 	 }
+					}
+					);
+					
+					new Effect.Morph
+					(
+					'hslider',
+					{
+					 	 style : 
+					{
+						color : "#000050"
+					},
+					 queue:{position:'end',scope:'hsld'},
+					 duration: slide_duration, //time to remaion of blue color
+					 afterFinish : function(effect) { $('hslider').setStyle({color:"#ff3300"}); }
+					}
+					);
+					
+					
+					new Effect.Morph
+					(
+					'hslider',
+					{
+					 style : 
+					{
+						color : "#fff"			
+					},
+					 queue:{position:'end',scope:'hsld'
+					 },
+					 duration: fade_duration, //time to fade into white color
+					 afterFinish : function(effect) { $('hslider').update("")}
+					}
+					);						
+					
+				});
+				var oggetto = this;
+				new Effect.Morph
+				(
+				'hslider',
+				{
+				 style : 
+					{
+						color : "#002050"
+					},
+				 queue:{position:'end',scope:'hsld'},
+				 duration: 0.1,
+				 afterFinish: function(effect) { oggetto.slide() }
+				}
+				);
+			}
+		}		
+		

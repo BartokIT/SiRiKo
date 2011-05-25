@@ -1,0 +1,250 @@
+body
+{
+		font-family: Verdana;
+}
+
+
+
+#new
+{
+	font-family: Verdana;
+	font-size:11px;
+	text-align:center;
+	color:red;
+	height:16px;
+	width: 100%;
+	margin:0px;
+	margin-bottom:6px;
+	font-variant:small-caps;
+	font-weight: bolder;
+	position:relative;
+} 
+
+/*---------VBOX MAIN------------*/
+#corpo
+{
+	font-family: Verdana;
+	font-size:9px;
+	position: relative;
+	overflow:hidden;
+	padding: 0px;
+	text-align: left;
+}
+
+.testo
+{
+	color: #000050;
+ 	padding-left:10px;
+ 	padding-right: 5px;
+	text-align: left;
+}
+
+.testo a:hover
+{
+	color: red;
+}	
+
+.testo a
+{
+	color: #000050;
+	text-decoration: none;
+	
+}	
+					
+.testo ul
+{
+ 	text-align: left;
+ 	padding-left:10px;
+ 	padding-right: 5px;			 	
+	list-style-type: none;
+	margin:0px;
+}		
+
+#header
+{
+	width: 100%;
+	height: 5em;
+	border-left: 2px solid #555;
+	border-right: 2px solid #555;	
+	text-align: center;
+	font-family: Verdana;
+	font-size:2em;	
+	line-height:73px;
+	background: url("image/admin_header.png") 50% 50% no-repeat  ;
+}	
+
+/*----------MENU---------------*/
+#menubar
+{
+	font-family: Verdana;
+	font-size:.7em;	
+	margin:0;
+	padding: 0.5em 0;
+	border-bottom: 1px solid #000;
+	text-align:center;
+	font-weight: bold;
+	margin-bottom: 2em;
+}
+
+#menubar li 
+{
+	display: inline;
+	margin:0;
+	height: 0;
+	border-left: 1px solid #666;
+	padding: 0 1em;
+}
+
+#menubar li.primaVoce
+{
+	border-left: none;
+}
+
+#menubar a{
+	white-space:nowrap;
+}
+
+#menubar a:link, #menubar a:visited
+{
+	color: #004;
+	text-decoration: none;
+}
+
+#menubar a:hover, #menubar a:focus, #menubar:active
+{
+	color: #008;
+	text-decoration: underline;
+}
+
+#item_container
+{
+	width: 80%;
+	margin: auto;
+}
+
+/* ----------VBOX MAIN ------------*/
+
+.sortable
+{
+	cursor: move;
+	background: #EEE;
+	border: 1px dashed #AAA;
+	margin-bottom:1em;
+}
+
+.sortable .ordine
+{
+	font-size: 2em;
+	color: #999;
+}
+
+.sortable .link
+{
+	height: 2em;
+}
+
+
+.edit a
+{
+	display:block;
+}
+
+.del a 
+{
+	display: block;
+}
+.edit img
+{
+	border: none;
+}
+
+.del img
+{
+	border: none;
+}
+
+.add 
+{
+	display:block;
+	line-height:48px;
+	height:48px;
+	font-size:.9em;
+	color: #000;
+	text-decoration:none;
+}
+
+.add:hover
+{
+	background-color:#EEE;
+	border: 1px dashed #AAA;	
+}
+
+.add img
+{
+	vertical-align: middle;
+	border: none;
+}
+
+/* ----------VBOX ADD ------------*/
+
+form.prettyform fieldset
+{
+	border: none;
+	margin:auto;
+	/*border: 1px solid blue;*/
+	width: 80%;
+}
+
+form.prettyform fieldset ul
+{
+	list-style:none;
+	padding:0;
+	margin:0;
+}
+
+form.prettyform fieldset ul li
+{
+	list-style:none;
+	padding:0;
+	margin:0;
+	margin-bottom:1em;
+	clear:both;
+	/*border: 1px solid green;*/
+}
+
+form.prettyform fieldset ul li label
+{
+	float: left;
+	width:10%;
+	font-size:.8em;
+	font-weight: bold;
+}
+
+form.prettyform fieldset ul li label .error
+{
+	color:red;
+	font-size:.7em;
+	font-weight: normal;
+}
+
+form.prettyform fieldset ul li  textarea
+{
+	margin-left: 20px;
+	width:89%;
+}
+
+
+form.prettyform fieldset input
+{
+	border: 1px solid #999;	
+}
+
+form.prettyform fieldset input[type=text]
+{
+	width:89%;
+}
+
+form.prettyform fieldset input[type=password]
+{
+	width:89%;
+}
