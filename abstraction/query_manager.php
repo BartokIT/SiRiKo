@@ -102,7 +102,7 @@ function insert_user_in_game($user_id, $game_id = -1)
 					$game_id = $row[0] + 1;
 			}			
 		
-			$sql_string_game_id = "INSERT INTO $table_name_status(id_game, round, gamer, action) VALUE ($game_id, 0, 1,\"init\")";
+			$sql_string_game_id = "INSERT INTO $table_name_status(id_game, round, gamer, status) VALUE ($game_id, 0, 1,\"init\")";
 			$result = mysql_query($sql_string_game_id);
 			if (!$result)
 				die("#3 - impossibile aggiungere una nuova partita  " . mysql_error());
@@ -111,7 +111,7 @@ function insert_user_in_game($user_id, $game_id = -1)
 	}
 	
 	//Cerco qualè l'ordine dell'ultimo giocatore inserito nel gioco
-	$player_order = 0;
+	$player_order = 1;
 	$sql_string_order = "SELECT MAX(porder) FROM  $table_name_participant WHERE (ext_game = $game_id)";
 	$result = mysql_query($sql_string_order);
 	if (!$result)
@@ -133,6 +133,57 @@ function insert_user_in_game($user_id, $game_id = -1)
 	if (!$result)
 		die("#5 - impossibile aggiungere l'utente al gioco  " . mysql_error());
 	
+}
+
+/**
+* Funzione che permette di sapere se l'utente corrente è quello con id più basso
+* @return true|false
+*/
+function is_min_gamer()
+{
+	$result = null;
+	
+	$game_info = get_current_turn_and_action(session_id());
+	
+	if (count($game_info))
+	{
+		$min_gamer = get_first_gamer($game_info["id_game"]);
+		if ($min_gamer["user_session"] == session_id())
+			$result = true;
+		else
+			$result = false;
+	}
+
+	return $result;			
+}
+
+/** 
+* Restituisce l'order ed il session id del primo giocatore specificando l'id della partita
+* @return array porder - int, user_sessione - string
+*/
+function get_first_gamer($game_id)
+{
+
+	$gamer = array();
+	$table_name_participant="game_participants";
+	
+	$sql_string="SELECT p.porder, p.user_session FROM $table_name_participant p WHERE (p.ext_game = $game_id) AND (p.porder = ( SELECT MIN(pmin.porder) FROM $table_name_participant pmin))";
+	$result = mysql_query($sql_string);
+
+	if ($result)
+	{
+		if (mysql_num_rows($result))
+		{
+			$row=mysql_fetch_row($result);
+			if ($row[0] != null)
+			{
+				$gamer["order"] = $row[0];
+				$gamer["user_session"] = $row[1];
+			}		
+		}	
+	}
+	
+	return $gamer;
 }
 
 /**
@@ -196,7 +247,7 @@ function get_current_turn_and_action($user_id)
 	$table_name_participant="game_participants";
 	$table_name_status="game_status";
 	
-	$sql_string="SELECT s.round, s.gamer, s.action, i.user_session, s.id_game FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
+	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
 	
 	$result = mysql_query($sql_string);
 	if ($result)
@@ -216,5 +267,11 @@ function get_current_turn_and_action($user_id)
 		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
 	}
 	return $current_status;		
+}
+
+function set_status($id_game, $status, $substatus = null)
+{
+	$table_name_status="game_status";
+	$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\" WHERE (id_game = $id_game)";
 }
 ?>

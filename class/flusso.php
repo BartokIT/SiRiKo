@@ -187,19 +187,19 @@ class Flusso
 				$this->set_sub_area( $_REQUEST["area"]); //per ora la sub area può essere solo la stessa dell'area
 			}	
 
-				//prelevo i vecchi valori della sub area
-				$site_view_old = $this->get_site_view();
-				$area_old = $this->get_area(); 
-				$sub_area_old =  $this->get_sub_area();
-				$action_old = $action;
-				//imposto i valori correnti
-				$parameter = array(
-									0 => $this->get_site_view(),
-									1 => $this->get_area(),
-									2 => $this->get_sub_area(),
-									3 => $action,
-									4 => $this
-				);
+			//prelevo i vecchi valori della sub area
+			$site_view_old = $this->get_site_view();
+			$area_old = $this->get_area(); 
+			$sub_area_old =  $this->get_sub_area();
+			$action_old = $action;
+			//imposto i valori correnti
+			$parameter = array(
+								0 => $this->get_site_view(),
+								1 => $this->get_area(),
+								2 => $this->get_sub_area(),
+								3 => $action,
+								4 => $this
+			);
 
 			//chiamo la funzione utente
 			$ret_object = call_user_func_array($this->callback_elaborazione, $parameter );
