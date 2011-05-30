@@ -56,15 +56,15 @@ function initialize() {
 	},5000);
   }
 
-function logica_gioco(data, textStatus, jqXHR)
+function logica_gioco(response, textStatus, jqXHR)
 {	
 	$('#result').empty();
-	switch (data.status)
+	switch (response.status)
 	{
 		case "init":
-			if (data.substatus == null)
+			if (response.substatus == null)
 			{
-				if (data.data.min_player)
+				if (response.data.min_player)
 					{
 						var inizia_ordine_gioco_button = '<a id="init_order_gamer" href="#">Inizia ordinamento gioco</a>';
 						$('#result').append(inizia_ordine_gioco_button);
@@ -74,9 +74,16 @@ function logica_gioco(data, textStatus, jqXHR)
 						});
 					}
 			}
-			else if (data.substatus == "trow_dice")
+			else if (response.substatus == "trow_dice")
 			{
-				var tira_dado_button = '<a href="index.php?init_dice_launch">Lancia dado</a>';
+				if (response.data.gamer_turn)
+				{
+					var tira_dado_button = '<a href="index.php?init_dice_launch">Lancia dado</a>';
+				}
+				else
+				{
+					var tira_dado_button = '<a href="index.php?init_dice_launch">In attesa di lanciare il dado</a>';
+				}
 				$('#result').append(tira_dado_button);	
 			}
 	}

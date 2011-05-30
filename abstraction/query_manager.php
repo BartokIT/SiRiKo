@@ -187,13 +187,37 @@ function get_first_gamer($game_id)
 }
 
 /**
+*
+*
+*/
+function get_gamer_order($user_session)
+{
+	$gamer_order = -1;
+	
+	$table_name_participant="game_participants";
+	
+	$sql_string="SELECT p.porder FROM $table_name_participant p  WHERE (p.user_session =\"$user_session\")";
+	
+	$result = mysql_query($sql_string);
+	if ($result)
+	{
+		if (mysql_num_rows($result))
+		{
+			$row=mysql_fetch_row($result);
+			if ($row[0] != null)
+				$gamer_order  = $row[0];
+		}	
+	}
+	
+	return $gamer_order;
+}
+/**
 * Restituisce l'order del prossimo gamer. Se non c'è alcun prossimo allora restituisce -1;
 * @return int
 */
 function get_next_gamer($game_id, $user_order)
 {
 	$next_gamer = -1;
-	$current_status = array();
 	$table_name_participant="game_participants";
 	
 	$sql_string="SELECT MIN(p.porder) FROM $table_name_participant p  WHERE (p.porder > $user_order)";
@@ -224,7 +248,7 @@ function set_next_gamer($game_id, $user_order)
 	
 	$sql_string="UPDATE TABLE (p.porder) FROM $table_name_participant p  WHERE (p.porder > $user_order)";
 	
-	$result = mysql_query($sql_string);
+	//$result = mysql_query($sql_string);
 	if ($result)
 	{
 		if (mysql_num_rows($result))
@@ -247,7 +271,7 @@ function get_current_turn_and_action($user_id)
 	$table_name_participant="game_participants";
 	$table_name_status="game_status";
 	
-	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
+	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game, s.substatus FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
 	
 	$result = mysql_query($sql_string);
 	if ($result)
@@ -257,7 +281,8 @@ function get_current_turn_and_action($user_id)
 			$row=mysql_fetch_row($result);
 			$current_status["round"] = $row[0];
 			$current_status["current_participant"] = $row[1];
-			$current_status["action"] = $row[2];
+			$current_status["status"] = $row[2];
+			$current_status["substatus"] = $row[5];
 			$current_status["user"] = $row[3];
 			$current_status["id_game"] = $row[4];
 		}
@@ -269,9 +294,19 @@ function get_current_turn_and_action($user_id)
 	return $current_status;		
 }
 
-function set_status($id_game, $status, $substatus = null)
+/**
+* Imposta uno stato particolare di gioco
+* @TODO: aggiungere impostazione azione e dati
+*/
+function set_current_status($id_game, $status, $substatus = null)
 {
 	$table_name_status="game_status";
 	$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\" WHERE (id_game = $id_game)";
+
+	$result = mysql_query($sql_string);
+	if (!$result)
+	{
+		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
+	}	
 }
 ?>

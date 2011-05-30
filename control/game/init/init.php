@@ -11,6 +11,12 @@
 		case "":
 			//Invio al client lo stato corrente specificando se è quello con l'ordine più basso
 			//@TODO: scrivere una funzione che fa una sola chiamata al DB
+			$game_info = get_current_turn_and_action(session_id());
+			if ($game_info["substatus"] != "" )
+			{
+				return new ReturnedArea("game", "init", $game_info["substatus"]);
+			}
+			
 			$min_player = false;
 			$min = is_min_gamer();
 			if ($min)
@@ -20,7 +26,8 @@
 			return new ReturnedAjax($return);
 			break;
 		case "init_dice_launch":
-			
+			$game_info = get_current_turn_and_action(session_id());
+			set_current_status($game_info["id_game"], "init", "trow_dice");
 			return new ReturnedArea("game", "init", "trow_dice");
 			
 	}
