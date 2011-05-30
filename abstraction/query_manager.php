@@ -244,22 +244,14 @@ function set_next_gamer($game_id, $user_order)
 {
 	$next_gamer = -1;
 	$current_status = array();
-	$table_name_participant="game_participants";
+	$table_name_status="game_status";
 	
-	$sql_string="UPDATE TABLE (p.porder) FROM $table_name_participant p  WHERE (p.porder > $user_order)";
-	
-	//$result = mysql_query($sql_string);
-	if ($result)
+	$sql_string="UPDATE $table_name_status SET gamer = \"$user_order\"";
+	$result = mysql_query($sql_string);
+	if (!$result)
 	{
-		if (mysql_num_rows($result))
-		{
-			$row=mysql_fetch_row($result);
-			if ($row[0] != null)
-				$next_gamer  = $row[0];			
-		}	
+		die("#1 - Impossibile impostare prossimo gamer");	
 	}
-	
-	return $next_gamer;
 }
 
 /**
@@ -271,26 +263,29 @@ function get_current_turn_and_action($user_id)
 	$table_name_participant="game_participants";
 	$table_name_status="game_status";
 	
-	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game, s.substatus FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
+	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game, s.substatus, s.data FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
 	
 	$result = mysql_query($sql_string);
 	if ($result)
 	{
+
 		if (mysql_num_rows($result))
 		{
 			$row=mysql_fetch_row($result);
 			$current_status["round"] = $row[0];
-			$current_status["current_participant"] = $row[1];
+			$current_status["current_gamer"] = $row[1];
 			$current_status["status"] = $row[2];
 			$current_status["substatus"] = $row[5];
 			$current_status["user"] = $row[3];
 			$current_status["id_game"] = $row[4];
+			$current_status["data"] = $row[6];
 		}
 	}
 	else
 	{
 		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
 	}
+	
 	return $current_status;		
 }
 
@@ -298,11 +293,18 @@ function get_current_turn_and_action($user_id)
 * Imposta uno stato particolare di gioco
 * @TODO: aggiungere impostazione azione e dati
 */
-function set_current_status($id_game, $status, $substatus = null)
+function set_current_status($id_game, $status, $substatus = null, $data=null)
 {
 	$table_name_status="game_status";
-	$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\" WHERE (id_game = $id_game)";
-
+	if ($substatus == null)
+		$substatus = "";
+	if ($data == null)	
+		$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\" WHERE (id_game = $id_game)";
+	else
+	{
+		$data = mysql_escape_string($data);
+		$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\", data=\"$data\" WHERE (id_game = $id_game)";
+	}	
 	$result = mysql_query($sql_string);
 	if (!$result)
 	{

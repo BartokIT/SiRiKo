@@ -51,8 +51,9 @@
 			
 			//Se già è in sessione allora lo rimando alla pagina di init
 			if ($id_game != -1 )
+			{
 				return new ReturnedArea("game", "init");
-			
+			}
 			
 			$games = get_id_games();
 			//Se esiste già una partita allora lo aggiungo a questa

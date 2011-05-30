@@ -78,13 +78,28 @@ function logica_gioco(response, textStatus, jqXHR)
 			{
 				if (response.data.gamer_turn)
 				{
-					var tira_dado_button = '<a href="index.php?init_dice_launch">Lancia dado</a>';
+					var tira_dado_button = '<a id="launch_die" href="#">Lancia dado</a>';
+					$('#result').append(tira_dado_button);	
+					$('#launch_die').click(function(event) {
+							event.preventDefault();
+							$.ajax("index.php?action=launch_die");
+						});
 				}
 				else
 				{
-					var tira_dado_button = '<a href="index.php?init_dice_launch">In attesa di lanciare il dado</a>';
+					var gamer_status = "";
+					var gamer_order = response.data.gamer_order;
+					console.log(response.data);
+
+					if (response.data.dice[gamer_order])
+					{
+						gamer_status = "Attendi che tirino gli altri giocatori";
+					}
+					else
+						gamer_status = 'In attesa di lanciare il dado';
+					$('#result').append(gamer_status);	
 				}
-				$('#result').append(tira_dado_button);	
+				
 			}
 	}
 	
