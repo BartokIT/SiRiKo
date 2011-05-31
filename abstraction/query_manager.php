@@ -54,7 +54,34 @@ function get_id_games()
 	
 	return $array_games;
 }
+/**
+* Questa funzione restituisce l'elenco dei partecipanti alla partita
+*/
+function get_gamers($id_game)
+{
+	$table_name="game_participants";
+	$sql_string="SELECT s.user_session, s.porder FROM $table_name s WHERE (s.ext_game = $id_game)";
+	$array_gamer= array();
+	
+	$result = mysql_query($sql_string);
+	if ($result)
+	{
+		while ($row=mysql_fetch_row($result))
+		{
+			$array_gamer[$row[1]] =array("order"=> $row[1], "user_session"=>$row[0]);
+		}
+	}
+	else
+	{
+		die("#1 - impossibile ottenere l'elenco dei partecipanti alla partita " . mysql_error());
+	}
+	
+	return $array_gamer;	
+}
 
+/**
+* Questa funzione restituisce l'elenco dei co-partecipanti alla partita
+*/
 function get_co_gamers($user_session_id)
 {
 	$table_name="game_participants";
@@ -157,6 +184,29 @@ function is_min_gamer()
 	return $result;			
 }
 
+/**
+* Funzione che permette di sapere se l'utente corrente è quello con id più alto nella partita corrente
+* @return true|false
+*/
+function is_max_gamer()
+{
+	$result = null;
+	
+	$game_info = get_current_turn_and_action(session_id());
+	
+	if (count($game_info))
+	{
+		$min_gamer = get_last_gamer($game_info["id_game"]);
+		if ($min_gamer["user_session"] == session_id())
+			$result = true;
+		else
+			$result = false;
+	}
+
+	return $result;			
+}
+
+
 /** 
 * Restituisce l'order ed il session id del primo giocatore specificando l'id della partita
 * @return array porder - int, user_sessione - string
@@ -168,6 +218,35 @@ function get_first_gamer($game_id)
 	$table_name_participant="game_participants";
 	
 	$sql_string="SELECT p.porder, p.user_session FROM $table_name_participant p WHERE (p.ext_game = $game_id) AND (p.porder = ( SELECT MIN(pmin.porder) FROM $table_name_participant pmin))";
+	$result = mysql_query($sql_string);
+
+	if ($result)
+	{
+		if (mysql_num_rows($result))
+		{
+			$row=mysql_fetch_row($result);
+			if ($row[0] != null)
+			{
+				$gamer["order"] = $row[0];
+				$gamer["user_session"] = $row[1];
+			}		
+		}	
+	}
+	
+	return $gamer;
+}
+
+/** 
+* Restituisce l'order ed il session id dell'ultimo giocatore specificando l'id della partita
+* @return array porder - int, user_sessione - string
+*/
+function get_last_gamer($game_id)
+{
+
+	$gamer = array();
+	$table_name_participant="game_participants";
+	
+	$sql_string="SELECT p.porder, p.user_session FROM $table_name_participant p WHERE (p.ext_game = $game_id) AND (p.porder = ( SELECT MAX(pmin.porder) FROM $table_name_participant pmin))";
 	$result = mysql_query($sql_string);
 
 	if ($result)
@@ -310,5 +389,29 @@ function set_current_status($id_game, $status, $substatus = null, $data=null)
 	{
 		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
 	}	
+}
+
+/**
+* Ordina i giocatori secondo il risultato dei dadi
+*/
+function compute_gamer_order($id_game, $dice_array)
+{
+	$table_name_participant="game_participants";
+	
+	//ordino l'array
+	asort($dice_array);
+	
+	$participants = get_gamers($id_game);
+
+	$count_order = 1;
+	foreach ($dice_array as $player_order=>$value )
+	{
+		$sql_string ="UPDATE $table_name_participant SET porder=$count_order WHERE (user_session=\"" . $participants[$player_order]["user_session"] ."\")";
+		$result = mysql_query($sql_string);
+		if (!$result)
+			die("#1 - impossibile variare l'ordine dei giocatori " . mysql_error());
+
+		$count_order++;
+	}
 }
 ?>

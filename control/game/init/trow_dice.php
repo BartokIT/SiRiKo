@@ -10,7 +10,8 @@
 		default:
 		case "":
 			//Invio al client lo stato corrente specificando se è quello con l'ordine più basso
-			//@TODO: scrivere una funzione che fa una sola chiamata al DB
+			//@TODO: scrivere una funzione che fa una sola chiamata al DB3
+			$status_data= array("dice"=>array());
 			$player_order = get_gamer_order(session_id());
 			$game_info = get_current_turn_and_action(session_id());
 			if ($game_info["data"] != "")
@@ -47,11 +48,22 @@
 				$status_data["dice"][ get_gamer_order(session_id())] = $roll;
 				set_current_status($game_info["id_game"], "init", "trow_dice", serialize($status_data));
 			}
+
+			//Controllo se sono l'ultimo giocatore ad effettuare il lancio del dado			
+			if (is_max_gamer())
+			{
+				//Ordino i giocatori in base al risultato dei lanci
+				compute_gamer_order($game_info["id_game"], $status_data["dice"]);
+				return new ReturnedArea("game", "game");
+			}
+			else
+			{
+				//Prendo il prossimo partecipante e gli passo lo stato attivo
+				$next_gamer = get_next_gamer($game_info["id_game"], $game_info["current_gamer"]);
 			
-			//Prendo il prossimo partecipante e gli passo lo stato attivo
-			$next_gamer = get_next_gamer($game_info["id_game"], $game_info["current_gamer"]);
-			set_next_gamer($game_info["id_game"], $next_gamer);
-			return new ReturnedArea("game", "init", "trow_dice");
+				set_next_gamer($game_info["id_game"], $next_gamer);
+				return new ReturnedArea("game", "init", "trow_dice");
+			}
 			break;
 	}
 

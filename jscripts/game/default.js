@@ -10,7 +10,7 @@ function initialize() {
  
     layer = new google.maps.FusionTablesLayer({
       query: {
-        select: 'kml_4326',
+        select: 'kml_4326,admin',
         from: '882248'
       },   
   styles: [{
@@ -41,11 +41,27 @@ function initialize() {
   }
   ]
 });
+
+layer.setMap(map);
+google.maps.event.clearListeners();
+google.maps.event.addListener(map, 'click', function(event) {
+	placeMarker(event.latLng);
+});
+
+function placeMarker(location) {
+	var marker = new google.maps.Marker({
+	position: location, 
+	map: map
+	});
+
+	map.setCenter(location);
+	alert('prova');
+}; 
   
-  layer.setMap(map);
-  $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
-  $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
-	window.setInterval(function () 
+
+//  $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
+ // $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
+	/*window.setInterval(function () 
 	{
 		$.ajax({cache: false,
 		url : "index.php",
@@ -53,8 +69,8 @@ function initialize() {
 		success: logica_gioco
 		});
 
-	},5000);
-  }
+	},5000);*/
+}
 
 function logica_gioco(response, textStatus, jqXHR)
 {	
@@ -62,20 +78,32 @@ function logica_gioco(response, textStatus, jqXHR)
 	switch (response.status)
 	{
 		case "init":
+			//Se il sottostato è null devo iniziare la parte di lancio dei dati
 			if (response.substatus == null)
 			{
+				//Solamente il player che è entrato per primo può iniziare a lanciare il dado
 				if (response.data.min_player)
-					{
-						var inizia_ordine_gioco_button = '<a id="init_order_gamer" href="#">Inizia ordinamento gioco</a>';
-						$('#result').append(inizia_ordine_gioco_button);
-						$('#init_order_gamer').click(function(event) {
-							event.preventDefault();
-							$.ajax("index.php?action=init_dice_launch");
-						});
+				{
+					//Creo il pulsante per iniziare il gioco
+					var inizia_ordine_gioco_button = '<a id="init_order_gamer" href="#">Inizia ordinamento gioco</a>';
+					$('#result').append(inizia_ordine_gioco_button);
+					$('#init_order_gamer').click(function(event) {
+						event.preventDefault();
+						$.ajax("index.php?action=init_dice_launch");
+					});
 					}
-			}
+			} //Altrimenti se sono nel sottostato trow_dice ho iniziato la procedura di lancio dei dadi
 			else if (response.substatus == "trow_dice")
 			{
+				//Con questa visualizzo i dadi appena lanciati
+				if (response.data.dice)
+				{
+					$.each(response.data.dice, function(index,value)
+					{
+						$('#result').append('<div>Giocatore ' + index + ': ' + value + '</div>');
+					});
+				}
+				//Se è il turno di questo giocatore allora visualizzo il pulsante di lancio del dado			
 				if (response.data.gamer_turn)
 				{
 					var tira_dado_button = '<a id="launch_die" href="#">Lancia dado</a>';
@@ -89,7 +117,7 @@ function logica_gioco(response, textStatus, jqXHR)
 				{
 					var gamer_status = "";
 					var gamer_order = response.data.gamer_order;
-					console.log(response.data);
+					//console.log(response.data);
 
 					if (response.data.dice[gamer_order])
 					{
@@ -99,6 +127,8 @@ function logica_gioco(response, textStatus, jqXHR)
 						gamer_status = 'In attesa di lanciare il dado';
 					$('#result').append(gamer_status);	
 				}
+				
+
 				
 			}
 	}
