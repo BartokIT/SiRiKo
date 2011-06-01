@@ -48,12 +48,17 @@ layer.setMap(map);
 google.maps.event.addListener(layer, 'click', function(event) {
 	var country_iso_code = event.row["iso_a3"].value;
 	var web_service = "http://api.geonames.org/neighboursJSON?formatted=true&username=shadow_silver&country=" + country_iso_code;
-	/*console.log(web_service);
-	$.ajax({cache: false,
+	console.log(web_service);
+	/*$.ajax({cache: false,
 		url : web_service,
 		dataType: "json",
 		success: get_neighbors
 	});*/
+	var marker = new google.maps.Marker({
+        position: event.latLng,
+      	title:"Hello World!"
+  });
+  	marker.setMap(map);
 });
 
 function get_neighbors(response, textStatus, jqXHR)

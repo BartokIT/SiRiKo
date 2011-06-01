@@ -14,6 +14,12 @@
 			$status_data= array("dice"=>array());
 			$player_order = get_gamer_order(session_id());
 			$game_info = get_current_turn_and_action(session_id());
+			//
+			if ($game_info["status"] != "init")
+			{
+				return new ReturnedArea("game", $game_info["status"]);
+			}
+			
 			if ($game_info["data"] != "")
 			{
 				$status_data = unserialize($game_info["data"]);
@@ -55,6 +61,7 @@
 			{
 				//Ordino i giocatori in base al risultato dei lanci
 				compute_gamer_order($game_info["id_game"], $status_data["dice"]);
+				set_current_status($game_info["id_game"], "game", "", serialize(array()));
 				return new ReturnedArea("game", "game");
 			}
 			else
