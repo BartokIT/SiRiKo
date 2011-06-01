@@ -39,29 +39,37 @@ function initialize() {
 	  fillColor: "#AA2233"
     }
   }
-  ]
+  ],
+  suppressInfoWindows: true
 });
 
 layer.setMap(map);
-google.maps.event.clearListeners();
-google.maps.event.addListener(map, 'click', function(event) {
-	placeMarker(event.latLng);
+
+google.maps.event.addListener(layer, 'click', function(event) {
+	var country_iso_code = event.row["iso_a3"].value;
+	var web_service = "http://api.geonames.org/neighboursJSON?formatted=true&username=shadow_silver&country=" + country_iso_code;
+	/*console.log(web_service);
+	$.ajax({cache: false,
+		url : web_service,
+		dataType: "json",
+		success: get_neighbors
+	});*/
 });
 
-function placeMarker(location) {
-	var marker = new google.maps.Marker({
-	position: location, 
-	map: map
+function get_neighbors(response, textStatus, jqXHR)
+{
+	var neighbors = "";
+	$.each(response.geonames, function(index, value)
+	{
+		neighbors += value.name + "; ";
 	});
-
-	map.setCenter(location);
-	alert('prova');
+	console.log(neighbors);
 }; 
   
 
-//  $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
- // $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
-	/*window.setInterval(function () 
+  $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
+ $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
+	window.setInterval(function () 
 	{
 		$.ajax({cache: false,
 		url : "index.php",
@@ -69,7 +77,7 @@ function placeMarker(location) {
 		success: logica_gioco
 		});
 
-	},5000);*/
+	},5000);
 }
 
 function logica_gioco(response, textStatus, jqXHR)

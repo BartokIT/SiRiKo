@@ -37,6 +37,7 @@
 		case "launch_die":
 			$roll = rand(1,6);
 			$game_info = get_current_turn_and_action(session_id());
+			
 			if ($game_info["data"] == "")
 			{
 				$status_data = array("dice"=>array( get_gamer_order(session_id())=>$roll));
