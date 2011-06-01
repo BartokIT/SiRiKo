@@ -14,7 +14,8 @@
 			$status_data= array("dice"=>array());
 			$player_order = get_gamer_order(session_id());
 			$game_info = get_current_turn_and_action(session_id());
-			//
+
+			//Controllo se non sono in un nuovo stato
 			if ($game_info["status"] != "init")
 			{
 				return new ReturnedArea("game", $game_info["status"]);

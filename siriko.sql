@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generato il: 29 mag, 2011 at 01:30 PM
+-- Generato il: 01 giu, 2011 at 11:20 PM
 -- Versione MySQL: 5.1.54
 -- Versione PHP: 5.3.5-1ubuntu7.2
 
@@ -18,6 +18,52 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `siriko`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `gamer_contry_info`
+--
+
+CREATE TABLE IF NOT EXISTS `gamer_contry_info` (
+  `ext_id_game` int(11) NOT NULL,
+  `ext_iso_country` varchar(3) NOT NULL,
+  `porder` int(11) NOT NULL,
+  `number_units` int(11) NOT NULL,
+  PRIMARY KEY (`ext_id_game`,`ext_iso_country`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dump dei dati per la tabella `gamer_contry_info`
+--
+
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `game_country`
+--
+
+CREATE TABLE IF NOT EXISTS `game_country` (
+  `iso_code` varchar(3) NOT NULL,
+  `continent` varchar(2) NOT NULL,
+  `neighbors` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `color` int(11) NOT NULL,
+  PRIMARY KEY (`iso_code`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dump dei dati per la tabella `game_country`
+--
+
+INSERT INTO `game_country` (`iso_code`, `continent`, `neighbors`, `name`, `color`) VALUES
+('ITA', 'EU', 'FRA;CHE', 'Italy', 1),
+('FRA', 'EU', 'DEU;ITA;ESP;CHE', 'France', 2),
+('DEU', 'EU', 'FRA;CHE', 'Germany', 4),
+('CHE', 'EU', 'ITA;FRA;DEU', 'Switzerland', 3),
+('PRT', 'EU', 'ESP', 'Portugal', 2),
+('ESP', 'EU', 'PRT;FRA', 'Spain', 1);
 
 -- --------------------------------------------------------
 
@@ -58,5 +104,3 @@ CREATE TABLE IF NOT EXISTS `game_status` (
 -- Dump dei dati per la tabella `game_status`
 --
 
-INSERT INTO `game_status` (`id_game`, `round`, `gamer`, `status`, `substatus`, `data`) VALUES
-(0, 0, 1, 'init', '', '');

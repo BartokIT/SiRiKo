@@ -10,33 +10,17 @@ function initialize() {
  
     layer = new google.maps.FusionTablesLayer({
       query: {
-        select: 'kml_4326,admin',
-        from: '882248'
+        select: 'kml_4326',
+        from: '931868',        
+		where: "Continent = 'EU'"
       },   
   styles: [{
+	
     polygonOptions: {
-      fillColor: "#000000",
-      fillOpacity: 0.2
-    }
-  }, {
-    where: "Number = 1",
-    polygonOptions: {
-      fillColor: "#0000FF"
-    }
-  }, {
-    where: "Number = 2",
-    polygonOptions: {
-	  fillColor: "#00FFFF"
-    }
-  }, {
-    where: "Number = 3",
-    polygonOptions: {
-	  fillColor: "#F0F0F0"
-    }
-  }, {
-    where: "Number = 4",
-    polygonOptions: {
-	  fillColor: "#AA2233"
+		fillColor: "#AA0022",
+		fillOpacity: 0.3,
+		strokeWeight: 1.0,
+		strokeColor: "#000000"
     }
   }
   ],
@@ -49,11 +33,11 @@ google.maps.event.addListener(layer, 'click', function(event) {
 	var country_iso_code = event.row["iso_a3"].value;
 	var web_service = "http://api.geonames.org/neighboursJSON?formatted=true&username=shadow_silver&country=" + country_iso_code;
 	console.log(web_service);
-	/*$.ajax({cache: false,
+	$.ajax({cache: false,
 		url : web_service,
 		dataType: "json",
 		success: get_neighbors
-	});*/
+	});
 	var marker = new google.maps.Marker({
         position: event.latLng,
       	title:"Hello World!"
