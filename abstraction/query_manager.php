@@ -414,4 +414,9 @@ function compute_gamer_order($id_game, $dice_array)
 		$count_order++;
 	}
 }
+
+function assign_country_and_units($id_Game)
+{
+	
+}
 ?>
