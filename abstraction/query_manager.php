@@ -401,7 +401,7 @@ function set_current_status($id_game, $status, $substatus = null, $data=null, $g
 	}
 		
 
-	$sql_string="UPDATE $table_name_status SET status = \"$status\" $$sql_string_assignments , substatus=\"$substatus\" WHERE (id_game = $id_game)";
+	$sql_string="UPDATE $table_name_status SET status = \"$status\" $sql_string_assignments , substatus=\"$substatus\" WHERE (id_game = $id_game)";
 
 	$result = mysql_query($sql_string);
 	if (!$result)
@@ -480,14 +480,14 @@ function assign_country_and_units($id_game, $continent)
 	$gamers_order = array_keys($gamers);
 	$num_gamers = count($gamers_order);
 	$num_country =count($countries);
-	$num_units_for_country = (int) TOTAL_UNITS / $num_country;
+	$num_units_for_country = (int) floor(TOTAL_UNITS / $num_country);
 	
 	$nth_player = 0;
 	foreach ($countries as $country)
 	{
 		//assegno ad ogni giocatore una nazione ed un numreo uguale di unità
-		assign_country($id_game, $gamers_order[$nth_player], $country_code,$num_units_for_country );
-		$nt_player = ($nt_player + 1) % $gamers_order;
+		assign_country($id_game, $gamers_order[$nth_player], $country,$num_units_for_country );
+		$nth_player = ($nth_player + 1) % $num_gamers;
 	}
 	
 }
@@ -517,7 +517,7 @@ function assign_country($id_game, $player, $country_code,$units )
 	//Nel caso in cui non sia in possesso di nessuno inserisco una nuova riga
 	if ($country_owner == -1)
 	{
-		$sql_string_insert = "INSERT INTO $table_name_gamer_country(ext_id_game, ext_iso_country, porder, number_units) VALUE ($id_game, $country_code, $player, $units)";
+		$sql_string_insert = "INSERT INTO $table_name_gamer_country(ext_id_game, ext_iso_country, porder, number_units) VALUE ($id_game, \"$country_code\", $player, $units)";
 		$result = mysql_query($sql_string_insert);
 		
 		if (!$result)
@@ -525,11 +525,40 @@ function assign_country($id_game, $player, $country_code,$units )
 	}
 	else
 	{
-		$sql_string_update = "UPDATE TABLE $table_name_gamer_country SET porder=$player, number_units= $units WHERE (ext_id_game = $id_game) AND ( ext_iso_country = \"$country_code\")";
-		$result = mysql_query($sql_string_insert);
+		$sql_string_update = "UPDATE  $table_name_gamer_country SET porder=$player, number_units= $units WHERE (ext_id_game = $id_game) AND ( ext_iso_country = \"$country_code\")";
+		$result = mysql_query($sql_string_update);
 		
 		if (!$result)
 				die("#3 - [assign_country] impossibile aggiornare una assegnazione per lo stato $country_code - " . mysql_error());
 	}	
+}
+/**
+* Funzione che restituisce le unità disposte su ciascun territorio, suddivise per nazione
+*/
+function get_units_disposition($id_game)
+{
+	global $table_name_gamer_country;
+	$sql_string_check = "SELECT porder, ext_iso_country, number_units FROM $table_name_gamer_country WHERE (ext_id_game=$id_game)";
+	
+	$result = mysql_query($sql_string_check);
+	$units_dispos = array();
+	
+	if ($result)
+	{
+		while ($row=mysql_fetch_row($result))
+		{
+			
+			if (!isset($units_dispos[$row[0]]))
+				$units_dispos[$row[0]] = array();	
+			
+			$units_dispos[$row[0]][$row[1]]=array("country"=>$row[1], "units"=>$row[2]);
+		}
+	}
+	else
+	{
+		die("#1 - [get_units_disposition] impossibile ottenere l'elenco dei partecipanti alla partita " . mysql_error());
+	}
+	
+	return $units_dispos;
 }
 ?>

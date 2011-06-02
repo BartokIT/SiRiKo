@@ -63,10 +63,12 @@
 				compute_gamer_order($game_info["id_game"], $status_data["dice"]);
 				//Distribuisco le unita tra i giocatori
 				assign_country_and_units($game_info["id_game"], "EU");
-				$min_player = get_first_gamer($game_id);
+				$min_player = get_first_gamer($game_info["id_game"]);
 				
-				set_current_status($game_info["id_game"], "game", "", serialize(array()),$min_player, 0);
+				set_current_status($game_info["id_game"], "game", "", serialize(array()),$min_player["order"], 0);
+				
 				return new ReturnedArea("game", "game");
+				//return new ReturnedArea("game", "init", "trow_dice");
 			}
 			else
 			{
@@ -76,6 +78,7 @@
 				set_next_gamer($game_info["id_game"], $next_gamer);
 				return new ReturnedArea("game", "init", "trow_dice");
 			}
+			
 			break;
 	}
 

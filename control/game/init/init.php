@@ -12,7 +12,7 @@
 			//Invio al client lo stato corrente specificando se è quello con l'ordine più basso
 			//@TODO: scrivere una funzione che fa una sola chiamata al DB
 			$game_info = get_current_turn_and_action(session_id());
-			if ($game_info["substatus"] != "" )
+			if ($game_info["substatus"] != "" || $game_info["substatus"] != null)
 			{
 				return new ReturnedArea("game", "init", $game_info["substatus"]);
 			}

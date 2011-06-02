@@ -11,7 +11,7 @@
 		case "":
 			$player_order = get_gamer_order(session_id());
 			$status = get_current_turn_and_action(session_id());
-			
+			$units= get_units_disposition($status["id_game"]);
 			if ($player_order == $status["current_gamer"])
 				$currently_playing = true;
 			else
@@ -20,6 +20,7 @@
 			
 			$json_data["gamer_turn"]=$currently_playing;
 			$json_data["gamer_order"]= (int) $player_order;
+			$json_data["units"]= $units;
 			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
