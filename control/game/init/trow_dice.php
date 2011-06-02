@@ -61,10 +61,11 @@
 			{
 				//Ordino i giocatori in base al risultato dei lanci
 				compute_gamer_order($game_info["id_game"], $status_data["dice"]);
-				
 				//Distribuisco le unita tra i giocatori
-				assign_country_and_units($game_info["id_game"]);
-				set_current_status($game_info["id_game"], "game", "", serialize(array()));
+				assign_country_and_units($game_info["id_game"], "EU");
+				$min_player = get_first_gamer($game_id);
+				
+				set_current_status($game_info["id_game"], "game", "", serialize(array()),$min_player, 0);
 				return new ReturnedArea("game", "game");
 			}
 			else

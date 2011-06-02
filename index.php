@@ -8,6 +8,7 @@ function inizializza()
 }
 
 define("INDEX", basename($_SERVER['SCRIPT_FILENAME']));
+define("TOTAL_UNITS", 50);
 include("support.php");
 
 //inclusione libreria, nel caso in cui è installata l'estensione mb_string è semplicemente un wrapper

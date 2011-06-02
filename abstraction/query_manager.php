@@ -1,5 +1,10 @@
 <?php
 
+$table_name_gamer_country = "gamer_country_info";
+$table_name_participant="game_participants";
+$table_name_country = "game_country";
+$table_name_status = "game_status";
+
 /**
 * Controlla se un utente sta partecipando ad un gioco.
 * @return int Restituisce -1 se non sta partecipando a nessun gioco, altrimenti restituisce il numero di partita
@@ -311,6 +316,8 @@ function get_next_gamer($game_id, $user_order)
 				$next_gamer  = $row[0];			
 		}	
 	}
+	else
+		die("#1 - [get_next_gamer] impossibile ottenere il prossimo giocatore - " . mysql_error());
 	
 	return $next_gamer;
 }
@@ -329,7 +336,7 @@ function set_next_gamer($game_id, $user_order)
 	$result = mysql_query($sql_string);
 	if (!$result)
 	{
-		die("#1 - Impossibile impostare prossimo gamer");	
+		die("#1 - [set_next_gamer] Impossibile impostare prossimo gamer - " . mysql_error());	
 	}
 }
 
@@ -362,7 +369,7 @@ function get_current_turn_and_action($user_id)
 	}
 	else
 	{
-		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
+		die("#1 - [get_current_turn_and_action] impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
 	}
 	
 	return $current_status;		
@@ -372,22 +379,34 @@ function get_current_turn_and_action($user_id)
 * Imposta uno stato particolare di gioco
 * @TODO: aggiungere impostazione azione e dati
 */
-function set_current_status($id_game, $status, $substatus = null, $data=null)
+function set_current_status($id_game, $status, $substatus = null, $data=null, $gamer = null, $round = null)
 {
 	$table_name_status="game_status";
+	
+	$sql_string_assignments= "";
+
 	if ($substatus == null)
 		$substatus = "";
-	if ($data == null)	
-		$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\" WHERE (id_game = $id_game)";
-	else
+
+	if ($gamer != null)
+		$sql_string_assignments	.= " , gamer= $gamer";
+
+	if ($round != null)
+		$sql_string_assignments	.= " , round= $round";
+	
+	if ($data != null)
 	{
 		$data = mysql_escape_string($data);
-		$sql_string="UPDATE $table_name_status SET status = \"$status\", substatus=\"$substatus\", data=\"$data\" WHERE (id_game = $id_game)";
-	}	
+		$sql_string_assignments	.= " , data=\"$data\"";
+	}
+		
+
+	$sql_string="UPDATE $table_name_status SET status = \"$status\" $$sql_string_assignments , substatus=\"$substatus\" WHERE (id_game = $id_game)";
+
 	$result = mysql_query($sql_string);
 	if (!$result)
 	{
-		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
+		die("#1 - [set_current_status] impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
 	}	
 }
 
@@ -409,14 +428,108 @@ function compute_gamer_order($id_game, $dice_array)
 		$sql_string ="UPDATE $table_name_participant SET porder=$count_order WHERE (user_session=\"" . $participants[$player_order]["user_session"] ."\")";
 		$result = mysql_query($sql_string);
 		if (!$result)
-			die("#1 - impossibile variare l'ordine dei giocatori " . mysql_error());
+			die("#1 - [compute_gamer_order] impossibile variare l'ordine dei giocatori " . mysql_error());
 
 		$count_order++;
 	}
 }
 
-function assign_country_and_units($id_Game)
+/**
+* Funzione che assegna per un certo gioco le nazioni in maniera uniforme ai giocatori, filtrando il gioco per continente
+*/
+function assign_country_and_units($id_game, $continent)
 {
+	//----- TABLES_NAME ----
+	global $table_name_participant;
+	global $table_name_country;
+
 	
+	$gamers = array();
+	$countries = array();
+	
+	$sql_string_gamer = "SELECT porder, user_session FROM $table_name_participant WHERE (ext_game = $id_game )";
+	$sql_string_country = "SELECT iso_code FROM $table_name_country WHERE (continent = \"$continent\") ORDER BY color";
+		
+	$result = mysql_query($sql_string_gamer);
+	
+	//Prelevo tutti quanti i giocatori
+	if ($result)
+	{
+		while ($row=mysql_fetch_row($result))
+			$gamers[$row[0]] = $row[1];
+	}
+	else
+	{
+		die("#1 - [assign_country_and_units] impossibile ottenere l'elenco dei partecipanti alla partita " . mysql_error());
+	}
+	
+	//Prelevo tutte le nazioni disponibili per il continente selezionato
+	$result = mysql_query($sql_string_country);
+		
+	if ($result)
+	{
+		while ($row=mysql_fetch_row($result))
+			$countries[$row[0]] = $row[0];
+
+	}
+	else
+	{
+		die("#2 - [assign_country_and_units] impossibile ottenere l'elenco delle nazioni del continente EU " . mysql_error());
+	}
+	
+	$gamers_order = array_keys($gamers);
+	$num_gamers = count($gamers_order);
+	$num_country =count($countries);
+	$num_units_for_country = (int) TOTAL_UNITS / $num_country;
+	
+	$nth_player = 0;
+	foreach ($countries as $country)
+	{
+		//assegno ad ogni giocatore una nazione ed un numreo uguale di unità
+		assign_country($id_game, $gamers_order[$nth_player], $country_code,$num_units_for_country );
+		$nt_player = ($nt_player + 1) % $gamers_order;
+	}
+	
+}
+
+/**
+* Funzione che assegna una determinata nazione ad un giocatore con un certo numero di unità
+*/
+function assign_country($id_game, $player, $country_code,$units )
+{
+	global $table_name_gamer_country;
+	$sql_string_check = "SELECT porder FROM $table_name_gamer_country WHERE (ext_id_game=$id_game) AND (ext_iso_country = \"$country_code\")";
+	
+	$result = mysql_query($sql_string_check);
+	$country_owner = -1;
+	if ($result)
+	{
+		if (mysql_num_rows($result))
+		{
+			$row=mysql_fetch_row($result);
+			if ($row[0] != null)
+				$country_owner   = $row[0];			
+		}	
+	}
+	else
+		die("#1 - [assign_country] impossibile controllare l'appartenenza dello stato - " . mysql_error());
+	
+	//Nel caso in cui non sia in possesso di nessuno inserisco una nuova riga
+	if ($country_owner == -1)
+	{
+		$sql_string_insert = "INSERT INTO $table_name_gamer_country(ext_id_game, ext_iso_country, porder, number_units) VALUE ($id_game, $country_code, $player, $units)";
+		$result = mysql_query($sql_string_insert);
+		
+		if (!$result)
+				die("#2 - [assign_country] impossibile inserire una assegnazione per lo stato $country_code - " . mysql_error());
+	}
+	else
+	{
+		$sql_string_update = "UPDATE TABLE $table_name_gamer_country SET porder=$player, number_units= $units WHERE (ext_id_game = $id_game) AND ( ext_iso_country = \"$country_code\")";
+		$result = mysql_query($sql_string_insert);
+		
+		if (!$result)
+				die("#3 - [assign_country] impossibile aggiornare una assegnazione per lo stato $country_code - " . mysql_error());
+	}	
 }
 ?>
