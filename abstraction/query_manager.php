@@ -562,4 +562,34 @@ function get_units_disposition($id_game)
 	
 	return $units_dispos;
 }
+/*
+* Restituisce l'insieme dei codici  delle nazioni vicine a quella passata
+**/
+function get_country_neighbors($country_name)
+{
+	global $table_name_gamer_country;
+	global $table_name_country;
+	
+	$sql_string = "SELECT neighbors FROM $table_name_country WHERE (name = \"$country_name\")";
+	$result = mysql_query($sql_string);
+	
+	$countries_string = "";
+	$countries = array();
+	if ($result)
+	{
+		if ($row = mysql_fetch_row($result))
+		{
+			$countries_string = $row[0];
+		}
+		
+		$countries_string = explode(";",$countries_string);
+	}
+	else
+	{
+		die("#1 - [get_country_neighbors] impossibile ottenere l'elenco dei vicini alla nazione $country_name " . mysql_error());	
+	}
+	return $countries_string;
+	
+	return $countries;
+}
 ?>

@@ -1,6 +1,6 @@
 function initialize() {
 
-    var chicago = new google.maps.LatLng(41.850033, -87.6500523);
+    var chicago = new google.maps.LatLng(41.850033, 60.6500523);
 
     map = new google.maps.Map(document.getElementById('map_canvas'), {
       center: chicago,
@@ -58,21 +58,24 @@ function get_neighbors(response, textStatus, jqXHR)
 
   $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
  $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
-	window.setInterval(function () 
-	{
+	window.setInterval(getServerStatus,5000);
+}
+
+function getServerStatus()
+{
 		$.ajax({cache: false,
 		url : "index.php",
 		dataType: "json",
 		success: logica_gioco
 		});
-
-	},5000);
 }
-
 	
 
 jQuery.fn.compareArray = function(t) {
+	
     if (this.length != t.length) { return false; }
+
+    
     var a = this.sort(),
         b = t.sort();
     for (var i = 0; t[i]; i++) {
@@ -100,6 +103,7 @@ function check_same_status(previous_status, current_status)
 		{
 			if (!check_same_status(previous_status[key], value))
 			{
+				console.log("Object " + key + ":" + previous_status[key]);
 				return_value = false;
 				return false;
 			}
@@ -107,8 +111,9 @@ function check_same_status(previous_status, current_status)
 		}
 		else if ($.isArray(value))
 		{
-			if ( $(value).compareArray(previous_status[key]) )
+			if ( !$(value).compareArray(previous_status[key]) )
 			{
+				console.log("Array " + key + ":" + previous_status[key] + ":" + value);
 				return_value = false;
 				return false;				
 			}
@@ -126,6 +131,7 @@ function check_same_status(previous_status, current_status)
 	//console.log("Restituito " + return_value);	
 	return return_value;
 }
+
 var previous_response ={};
 var units_maker= new Array();
 
@@ -179,6 +185,7 @@ function logica_gioco(response, textStatus, jqXHR)
 						$('#launch_die').click(function(event) {
 								event.preventDefault();
 								$.ajax("index.php?action=launch_die");
+								getServerStatus();
 							});
 					}
 					else
@@ -228,12 +235,28 @@ function logica_gioco(response, textStatus, jqXHR)
 											//Nel momento in cui è rilasciato viene riportato alla posizione originale
 											google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
 											{
-												console.log(units_maker[iso_code]["original_position"]);
+												//console.log(units_maker[iso_code]["original_position"]);
 												units_maker[iso_code]["marker"].setPosition(units_maker[iso_code]["original_position"]);
-												geocoder.geocode({'latLng': event.latLng}, function(results, status) {
+												geocoder.geocode({'latLng': event.latLng, 'language': "en"}, function(results, status) {
 												if (status == google.maps.GeocoderStatus.OK) {
-													if (results[1]) {
-														console.log(results[1].address_component["country"]);
+													
+													if (results[0]) {
+														$.each(results[1].address_components,function(index, value)
+														{
+															$.each(value.types, function(index2, address_type)
+															{
+																if (address_type == 'country')
+																{
+																	console.log(value.long_name);
+																			$.ajax({cache: false,
+																			url : "index.php",
+																			dataType: "json",
+																			success: logica_gioco
+																			});
+																}
+															}
+															);
+														});
 													}
 												} else {
 													alert("Geocoder failed due to: " + status);
@@ -257,3 +280,5 @@ function logica_gioco(response, textStatus, jqXHR)
 	//Salvo lo stato per il confronto
 	previous_response = response;
 }
+
+function 

@@ -16,6 +16,7 @@
 				$currently_playing = true;
 			else
 				$currently_playing = false;
+		
 			$json_data = array();
 			
 			$json_data["gamer_turn"]=$currently_playing;
@@ -24,6 +25,15 @@
 			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
+		case "get_neighbors":
+			$country_name = $_REQUEST["country_name"];
+			get_country_neighbors($country_name)
+
+			
+			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
+			return new ReturnedAjax($return);
+			break;
+		
 
 	}
 
