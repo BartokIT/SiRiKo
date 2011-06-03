@@ -25,7 +25,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Struttura della tabella `gamer_contry_info`
 --
 
-CREATE TABLE IF NOT EXISTS `gamer_contry_info` (
+CREATE TABLE IF NOT EXISTS `gamer_country_info` (
   `ext_id_game` int(11) NOT NULL,
   `ext_iso_country` varchar(3) NOT NULL,
   `porder` int(11) NOT NULL,

@@ -533,12 +533,13 @@ function assign_country($id_game, $player, $country_code,$units )
 	}	
 }
 /**
-* Funzione che restituisce le unità disposte su ciascun territorio, suddivise per nazione
+* Funzione che restituisce le unità disposte su ciascun territorio, suddivise prima per giocatore e poi per nazione
 */
 function get_units_disposition($id_game)
 {
 	global $table_name_gamer_country;
-	$sql_string_check = "SELECT porder, ext_iso_country, number_units FROM $table_name_gamer_country WHERE (ext_id_game=$id_game)";
+	global $table_name_country;
+	$sql_string_check = "SELECT g.porder, g.ext_iso_country, g.number_units, c.name FROM $table_name_gamer_country g, $table_name_country c WHERE (c.iso_code = g.ext_iso_country) AND (ext_id_game=$id_game)";
 	
 	$result = mysql_query($sql_string_check);
 	$units_dispos = array();
@@ -547,11 +548,11 @@ function get_units_disposition($id_game)
 	{
 		while ($row=mysql_fetch_row($result))
 		{
+			//Suddivido per player
+			if (!isset($units_dispos[(int)$row[0]]))
+				$units_dispos[(int)$row[0]] = array();	
 			
-			if (!isset($units_dispos[$row[0]]))
-				$units_dispos[$row[0]] = array();	
-			
-			$units_dispos[$row[0]][$row[1]]=array("country"=>$row[1], "units"=>$row[2]);
+			$units_dispos[(int)$row[0]][$row[1]]=array("country"=>$row[3], "units"=>$row[2]);
 		}
 	}
 	else

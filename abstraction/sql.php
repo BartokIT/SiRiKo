@@ -3,7 +3,7 @@
 $db_host="localhost";
 $db_name="siriko";
 $db_user="root";
-$db_pass="silver";
+$db_pass="";
 
 global $id_db_connection;
 $id_db_connection = @mysql_connect($db_host, $db_user, $db_pass);

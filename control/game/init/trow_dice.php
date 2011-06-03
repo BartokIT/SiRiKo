@@ -59,6 +59,7 @@
 			//Controllo se sono l'ultimo giocatore ad effettuare il lancio del dado			
 			if (is_max_gamer())
 			{
+				echo "max_gamer";
 				//Ordino i giocatori in base al risultato dei lanci
 				compute_gamer_order($game_info["id_game"], $status_data["dice"]);
 				//Distribuisco le unita tra i giocatori
