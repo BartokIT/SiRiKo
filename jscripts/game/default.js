@@ -89,15 +89,16 @@ function check_same_status(previous_status, current_status)
 	$.each(current_status, function(key, value)
 	{
 		//Se non esiste la chiave restituisco diversi
-		if (!previous_status[key])
+		if (!previous_status.hasOwnProperty(key))
 		{
+				console.log("no-key " + key + ":" + previous_status[key]);
 				return_value = false;
 				return false;			
 		}
-		
+
 		if ($.isPlainObject(value))
 		{
-			if (check_same_status(previous_status[key], value))
+			if (!check_same_status(previous_status[key], value))
 			{
 				return_value = false;
 				return false;
@@ -122,15 +123,17 @@ function check_same_status(previous_status, current_status)
 			}
 		}
 	});
-	
+	//console.log("Restituito " + return_value);	
 	return return_value;
 }
 var previous_response ={};
+var units_maker= new Array();
 
 function logica_gioco(response, textStatus, jqXHR)
 {	
 	if ( !check_same_status(previous_response,response))
 	{
+
 		$('#result').empty();
 		switch (response.status)
 		{
@@ -138,6 +141,14 @@ function logica_gioco(response, textStatus, jqXHR)
 				//Se il sottostato è null devo iniziare la parte di lancio dei dati
 				if (response.substatus == null)
 				{
+					var geocoder = new google.maps.Geocoder();
+					geocoder.geocode( { 'address': "Italy"}, function(results, status) {
+					  if (status == google.maps.GeocoderStatus.OK) {
+						map.setCenter(results[0].geometry.location);
+					  } else {
+						alert("Geocode was not successful for the following reason: " + status);
+					  }
+					  });
 					//Solamente il player che è entrato per primo può iniziare a lanciare il dado
 					if (response.data.min_player)
 					{
@@ -203,26 +214,46 @@ function logica_gioco(response, textStatus, jqXHR)
 									{
 										geocoder.geocode( { 'address': info.country}, function(results, status) {
 										  if (status == google.maps.GeocoderStatus.OK) {
-											console.log("Richiamato geocoder");
-											map.setCenter(results[0].geometry.location);
-											var marker = new google.maps.Marker({
+											console.log("Richiamato geocoder per " + info.country );
+											//map.setCenter(results[0].geometry.location);
+											units_maker[iso_code] = new Array();
+											units_maker[iso_code]["original_position"] = results[0].geometry.location;
+											units_maker[iso_code]["marker"] = new google.maps.Marker({
 												map: map,
 												position: results[0].geometry.location,
-												title: info.units
+												title: "Unità stanziate: " + info.units,
+												draggable: true
+											});
+
+											//Nel momento in cui è rilasciato viene riportato alla posizione originale
+											google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
+											{
+												console.log(units_maker[iso_code]["original_position"]);
+												units_maker[iso_code]["marker"].setPosition(units_maker[iso_code]["original_position"]);
+												geocoder.geocode({'latLng': event.latLng}, function(results, status) {
+												if (status == google.maps.GeocoderStatus.OK) {
+													if (results[1]) {
+														console.log(results[1].address_component["country"]);
+													}
+												} else {
+													alert("Geocoder failed due to: " + status);
+												}
+												});												
 											});
 										  } else {
 											alert("Geocode was not successful for the following reason: " + status);
 										  }
 										});
-	
 									});
 								}
 							});
+							
 				}
 			
 		}
 	}
-		
+	else
+		console.log("No status update");	
 	//Salvo lo stato per il confronto
 	previous_response = response;
 }
