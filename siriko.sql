@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `game_status` (
   `gamer` int(11) NOT NULL,
   `status` varchar(20) NOT NULL,
   `substatus` varchar(20) NOT NULL,
-  `data` varchar(100) NOT NULL,
+  `data` varchar(200) NOT NULL,
   PRIMARY KEY (`id_game`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

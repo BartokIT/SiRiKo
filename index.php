@@ -23,7 +23,7 @@ $table_prefix = "idx_";
 $new = new Flusso("siriko","nodo_principale");
 $nome_file = $new->elaborates();
 
-/*
+
 	echo "<pre>";
 	echo "SESSION ";
 	print_r($_SESSION);
@@ -37,7 +37,7 @@ $nome_file = $new->elaborates();
 	
 	
 	echo "</pre>";
-*/
+
 include($nome_file);
 
 ?>

@@ -128,6 +128,47 @@ function check_same_status(previous_status, current_status)
 			}
 		}
 	});
+
+	if (return_value)
+	$.each(previous_status, function(key, value)
+	{
+		//Se non esiste la chiave restituisco diversi
+		if (!current_status.hasOwnProperty(key))
+		{
+				console.log("no-key " + key + ":" + current_status[key]);
+				return_value = false;
+				return false;			
+		}
+
+		if ($.isPlainObject(value))
+		{
+			if (!check_same_status(current_status[key], value))
+			{
+				console.log("Object " + key + ":" + current_status[key]);
+				return_value = false;
+				return false;
+			}
+			
+		}
+		else if ($.isArray(value))
+		{
+			if ( !$(value).compareArray(current_status[key]) )
+			{
+				console.log("Array " + key + ":" + current_status[key] + ":" + value);
+				return_value = false;
+				return false;				
+			}
+		}
+		else	
+		{
+			
+			if (previous_status[key] != value)
+			{
+				return_value = false;
+				return false;
+			}
+		}
+	});	
 	//console.log("Restituito " + return_value);	
 	return return_value;
 }
@@ -164,6 +205,7 @@ function logica_gioco(response, textStatus, jqXHR)
 						$('#init_order_gamer').click(function(event) {
 							event.preventDefault();
 							$.ajax("index.php?action=init_dice_launch");
+							getServerStatus();
 						});
 						}
 				} //Altrimenti se sono nel sottostato trow_dice ho iniziato la procedura di lancio dei dadi
@@ -217,6 +259,7 @@ function logica_gioco(response, textStatus, jqXHR)
 							{	
 								if(!nations.lenght)
 								{
+									//Prelevo i dati della nazione
 									$.each(nations, function(iso_code, info )
 									{
 										geocoder.geocode( { 'address': info.country}, function(results, status) {
@@ -228,14 +271,17 @@ function logica_gioco(response, textStatus, jqXHR)
 											units_maker[iso_code]["marker"] = new google.maps.Marker({
 												map: map,
 												position: results[0].geometry.location,
-												title: "Unità stanziate: " + info.units,
-												draggable: true
+												title: "Unità stanziate: " + info.units												
 											});
-
+											//Imposto draggabili solamente i marker per i giocatore corrente e per le sue nazioni
+											if ((player == response.data.gamer_order) && response.data.gamer_turn)
+											{
+												units_maker[iso_code]["marker"].setDraggable(true);
+											}
 											//Nel momento in cui è rilasciato viene riportato alla posizione originale
 											google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
 											{
-												//console.log(units_maker[iso_code]["original_position"]);
+												//Cerco la nazione sulla quale è stato rilasciato il marker
 												units_maker[iso_code]["marker"].setPosition(units_maker[iso_code]["original_position"]);
 												geocoder.geocode({'latLng': event.latLng, 'language': "en"}, function(results, status) {
 												if (status == google.maps.GeocoderStatus.OK) {
@@ -247,11 +293,15 @@ function logica_gioco(response, textStatus, jqXHR)
 															{
 																if (address_type == 'country')
 																{
-																	console.log(value.long_name);
+																			//Una volta rilasciato il marker eseguo l'azione di attacco
 																			$.ajax({cache: false,
-																			url : "index.php",
+																			url : "index.php?action=attack",
+																			data: {'attacker_iso_country' : iso_code, 'defender_country': value.long_name},
 																			dataType: "json",
-																			success: logica_gioco
+																			success: function() 
+																			{
+																				
+																			}
 																			});
 																}
 															}
@@ -270,7 +320,11 @@ function logica_gioco(response, textStatus, jqXHR)
 									});
 								}
 							});
-							
+							break;
+					case "attacking":							
+						$.each(units_maker, function(index,value) {
+							value["marker"].setDraggable(false);
+						});
 				}
 			
 		}
@@ -281,4 +335,4 @@ function logica_gioco(response, textStatus, jqXHR)
 	previous_response = response;
 }
 
-function 
+

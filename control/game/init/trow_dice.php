@@ -66,8 +66,8 @@
 				assign_country_and_units($game_info["id_game"], "EU");
 				$min_player = get_first_gamer($game_info["id_game"]);
 				
-				set_current_status($game_info["id_game"], "game", "", serialize(array()),$min_player["order"], 0);
-				
+				set_current_status($game_info["id_game"], "game", "thinking", serialize(array()),$min_player["order"], 0);
+				echo "OK";
 				return new ReturnedArea("game", "game");
 				//return new ReturnedArea("game", "init", "trow_dice");
 			}
