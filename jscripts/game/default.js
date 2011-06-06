@@ -1,13 +1,23 @@
 function initialize() {
 
     var chicago = new google.maps.LatLng(41.850033, 60.6500523);
+	var style =                                           
+[ { featureType: "transit.station", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "transit.line", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.province", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.highway", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.land_parcel", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "all", elementType: "all", stylers: [ ] } ];
 
+
+	var sirikoMapType = new google.maps.StyledMapType(
+      style, {name:"siriko"});
+
+      
     map = new google.maps.Map(document.getElementById('map_canvas'), {
       center: chicago,
       zoom: 3,
-      mapTypeId: 'roadmap'
+      mapTypeId: 'terrain'
     });
- 
+
+	map.mapTypes.set('terrain', sirikoMapType);
+
+     
     layer = new google.maps.FusionTablesLayer({
       query: {
         select: 'kml_4326',
@@ -15,20 +25,19 @@ function initialize() {
 		where: "Continent = 'EU'"
       },   
   styles: [{
-	
     polygonOptions: {
 		fillColor: "#AA0022",
 		fillOpacity: 0.3,
 		strokeWeight: 1.0,
 		strokeColor: "#000000"
     }
-  }
-  ],
+  }],
   suppressInfoWindows: true
 });
 
 layer.setMap(map);
 
+/*
 google.maps.event.addListener(layer, 'click', function(event) {
 	var country_iso_code = event.row["iso_a3"].value;
 	var web_service = "http://api.geonames.org/neighboursJSON?formatted=true&username=shadow_silver&country=" + country_iso_code;
@@ -44,6 +53,7 @@ google.maps.event.addListener(layer, 'click', function(event) {
   });
   	marker.setMap(map);
 });
+*/
 
 function get_neighbors(response, textStatus, jqXHR)
 {
@@ -263,21 +273,23 @@ function logica_gioco(response, textStatus, jqXHR)
 									$.each(nations, function(iso_code, info )
 									{
 										geocoder.geocode( { 'address': info.country}, function(results, status) {
-										  if (status == google.maps.GeocoderStatus.OK) {
+										  if (status == google.maps.GeocoderStatus.OK)
+										  {
 											console.log("Richiamato geocoder per " + info.country );
 											//map.setCenter(results[0].geometry.location);
 											units_maker[iso_code] = new Array();
+											units_maker[iso_code]["player"] = player;
 											units_maker[iso_code]["original_position"] = results[0].geometry.location;
 											units_maker[iso_code]["marker"] = new google.maps.Marker({
 												map: map,
 												position: results[0].geometry.location,
 												title: "Unità stanziate: " + info.units												
 											});
+											
 											//Imposto draggabili solamente i marker per i giocatore corrente e per le sue nazioni
 											if ((player == response.data.gamer_order) && response.data.gamer_turn)
-											{
-												units_maker[iso_code]["marker"].setDraggable(true);
-											}
+											{ units_maker[iso_code]["marker"].setDraggable(true); }
+											
 											//Nel momento in cui è rilasciato viene riportato alla posizione originale
 											google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
 											{
@@ -298,10 +310,7 @@ function logica_gioco(response, textStatus, jqXHR)
 																			url : "index.php?action=attack",
 																			data: {'attacker_iso_country' : iso_code, 'defender_country': value.long_name},
 																			dataType: "json",
-																			success: function() 
-																			{
-																				
-																			}
+																			success: function() { }
 																			});
 																}
 															}
@@ -313,18 +322,51 @@ function logica_gioco(response, textStatus, jqXHR)
 												}
 												});												
 											});
-										  } else {
-											alert("Geocode was not successful for the following reason: " + status);
-										  }
+											
+										  } else { alert("Geocode was not successful for the following reason: " + status); }
 										});
 									});
 								}
 							});
 							break;
-					case "attacking":							
+					case "attacking":					
+						//Imposto i marker a non draggabili		
 						$.each(units_maker, function(index,value) {
 							value["marker"].setDraggable(false);
 						});
+						
+						//Aggiungo all'interfaccia la scelta del numero di unità da attaccare
+						$('#result').empty();
+						if (response.data.gamer_order == response.data.attack.attacker.player )
+						{
+							var choose_units_button = 'Scegli con quante unità attaccare<form action="#">';
+							for ( i=1; (i <=  response.data.attack.attacker.available_units) && (i<=3);i++)
+								choose_units_button += '<input  type="radio" name="" value="1" /> ' + i + '<br />';
+							choose_units_button +='<input type="submit" value="Scegli"/></form>';
+						
+							var choosen_units = $("input[name='units']:checked").val();
+							$('#result').append(choose_units_button);	
+							$('#launch_die').click(function(event) {
+									event.preventDefault();
+									$.ajax({cache: false,
+									url : "index.php?action=attackers_unit_choose",
+									data: {'units' : choosen_units},
+									dataType: "json",
+									success: function() { }
+									});
+									getServerStatus();
+							});
+						} else if (response.data.gamer_order == response.data.attack.defender.player )
+						{
+							var choose_units_button = 'Il giocatore ';
+							choose_units_button += response.data.attack.attacker.player + ' ti sta attaccando';
+							$('#result').append(choose_units_button);	
+						
+						} else {
+							var choose_units_button = 'Il giocatore ';
+							choose_units_button += response.data.attack.attacker.player + ' sta attaccando il giocatore ' + response.data.attack.defender.player ;
+							$('#result').append(choose_units_button);	
+						}
 				}
 			
 		}

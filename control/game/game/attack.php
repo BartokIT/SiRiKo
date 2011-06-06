@@ -26,6 +26,7 @@
 			$data  = unserialize($status["data"]);
 			$json_data["attack"] =$data["attack"];
 			$return = json_encode(array ('status'=>"game", "substatus"=>"attacking", "data"=>$json_data));
+
 			return new ReturnedAjax($return);
 			break;
 

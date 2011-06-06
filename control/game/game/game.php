@@ -83,8 +83,8 @@
 			//Aggiungo una voce ai dati riguardanti l'attacco che si sta compiendo
 			$status["data"]=array();
 			$status["data"]["attack"]= array();
-			$status["data"]["attack"]["attacker"] = array("player"=> $player_order,"available_units"=>($attacker_country["units"] - 1), "country"=>array("iso_code"=> $attacker_iso_code, "name"=>$attacker_country["name"]));
-			$status["data"]["attack"]["defender"] = array("player"=> $defender_country["owner"],"available_units"=>$defender_country["units"], "country"=>array("iso_code"=> $defender_country["iso_code"], "name"=>$defender_country_name));
+			$status["data"]["attack"]["attacker"] = array("player"=> (int)$player_order,"available_units"=>($attacker_country["units"] - 1), "country"=>array("iso_code"=> $attacker_iso_code, "name"=>$attacker_country["name"]));
+			$status["data"]["attack"]["defender"] = array("player"=>  (int)$defender_country["owner"],"available_units"=>$defender_country["units"], "country"=>array("iso_code"=> $defender_country["iso_code"], "name"=>$defender_country_name));
 			
 			set_current_status($status["id_game"], "game", "attack", serialize($status["data"]));
 			return new ReturnedArea("game", "game", "attack");
