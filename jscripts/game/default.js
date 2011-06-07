@@ -185,6 +185,78 @@ function check_same_status(previous_status, current_status)
 
 var previous_response ={};
 var units_maker= new Array();
+function drawMarkers(response)
+{
+	var geocoder = new google.maps.Geocoder();
+	var units = response.data.units;
+	//Ciclo tutte le unità ottenute
+	$.each(units, function(player, nations)
+	{	
+		if(!nations.lenght)
+		{
+			//Prelevo i dati della nazione
+			$.each(nations, function(iso_code, info )
+			{
+				geocoder.geocode( { 'address': info.country, 'language': 'en'}, function(results, status) {
+				  if (status == google.maps.GeocoderStatus.OK)
+				  {
+					console.log("Richiamato geocoder per " + info.country );
+					//map.setCenter(results[0].geometry.location);
+					units_maker[iso_code] = new Array();
+					units_maker[iso_code]["player"] = player;
+					units_maker[iso_code]["original_position"] = results[0].geometry.location;
+					units_maker[iso_code]["marker"] = new google.maps.Marker({
+						map: map,
+						position: results[0].geometry.location,
+						title: "Unità stanziate: " + info.units												
+					});
+				
+					//Imposto draggabili solamente i marker per i giocatore corrente e per le sue nazioni
+					if ((player == response.data.gamer_order) && response.data.gamer_turn)
+					{ units_maker[iso_code]["marker"].setDraggable(true); }
+				
+					//Nel momento in cui è rilasciato viene riportato alla posizione originale
+					google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
+					{
+						//Cerco la nazione sulla quale è stato rilasciato il marker
+						units_maker[iso_code]["marker"].setPosition(units_maker[iso_code]["original_position"]);
+						geocoder.geocode({'latLng': event.latLng, 'language': 'en'}, function(results, status) {
+						if (status == google.maps.GeocoderStatus.OK) {
+						
+							if (results[0]) {
+								$.each(results[1].address_components,function(index, value)
+								{
+									console.log(value.long_name);														
+									$.each(value.types, function(index2, address_type)
+									{
+
+										if (address_type == 'country')
+										{
+													//Una volta rilasciato il marker eseguo l'azione di attacco
+													$.ajax({cache: false,
+													url : "index.php?action=attack",
+													data: {'attacker_iso_country' : iso_code, 'defender_country': value.long_name},
+													dataType: "json",
+													success: function() { }
+													});
+										}
+									}
+									);
+								});
+							}
+						} else {
+							alert("Geocoder failed due to: " + status);
+						}
+						});												
+					});
+				
+				  } else { alert("Geocode was not successful for the following reason: " + status); }
+				});
+			});
+		}
+	});
+
+}
 
 function logica_gioco(response, textStatus, jqXHR)
 {	
@@ -261,78 +333,20 @@ function logica_gioco(response, textStatus, jqXHR)
 				switch (response.substatus)
 				{
 					case "thinking":
-							
-							var geocoder = new google.maps.Geocoder();
-							var units = response.data.units;
-							//Ciclo tutte le unità ottenute
-							$.each(units, function(player, nations)
-							{	
-								if(!nations.lenght)
-								{
-									//Prelevo i dati della nazione
-									$.each(nations, function(iso_code, info )
-									{
-										geocoder.geocode( { 'address': info.country}, function(results, status) {
-										  if (status == google.maps.GeocoderStatus.OK)
-										  {
-											console.log("Richiamato geocoder per " + info.country );
-											//map.setCenter(results[0].geometry.location);
-											units_maker[iso_code] = new Array();
-											units_maker[iso_code]["player"] = player;
-											units_maker[iso_code]["original_position"] = results[0].geometry.location;
-											units_maker[iso_code]["marker"] = new google.maps.Marker({
-												map: map,
-												position: results[0].geometry.location,
-												title: "Unità stanziate: " + info.units												
-											});
-											
-											//Imposto draggabili solamente i marker per i giocatore corrente e per le sue nazioni
-											if ((player == response.data.gamer_order) && response.data.gamer_turn)
-											{ units_maker[iso_code]["marker"].setDraggable(true); }
-											
-											//Nel momento in cui è rilasciato viene riportato alla posizione originale
-											google.maps.event.addListener(units_maker[iso_code]["marker"],'dragend', function(event)
-											{
-												//Cerco la nazione sulla quale è stato rilasciato il marker
-												units_maker[iso_code]["marker"].setPosition(units_maker[iso_code]["original_position"]);
-												geocoder.geocode({'latLng': event.latLng, 'language': "en"}, function(results, status) {
-												if (status == google.maps.GeocoderStatus.OK) {
-													
-													if (results[0]) {
-														$.each(results[1].address_components,function(index, value)
-														{
-															$.each(value.types, function(index2, address_type)
-															{
-																if (address_type == 'country')
-																{
-																			//Una volta rilasciato il marker eseguo l'azione di attacco
-																			$.ajax({cache: false,
-																			url : "index.php?action=attack",
-																			data: {'attacker_iso_country' : iso_code, 'defender_country': value.long_name},
-																			dataType: "json",
-																			success: function() { }
-																			});
-																}
-															}
-															);
-														});
-													}
-												} else {
-													alert("Geocoder failed due to: " + status);
-												}
-												});												
-											});
-											
-										  } else { alert("Geocode was not successful for the following reason: " + status); }
-										});
-									});
-								}
-							});
+							drawMarkers(response);
+		
 							break;
 					case "attacking":					
 						//Imposto i marker a non draggabili		
+						var count = 0;
+						if (units_maker.length == 0)
+						{
+							drawMarkers(response);
+						}
+						
 						$.each(units_maker, function(index,value) {
 							value["marker"].setDraggable(false);
+							count++;
 						});
 						
 						//Aggiungo all'interfaccia la scelta del numero di unità da attaccare
@@ -342,15 +356,15 @@ function logica_gioco(response, textStatus, jqXHR)
 							var choose_units_button = 'Scegli con quante unità attaccare<form action="#">';
 							for ( i=1; (i <=  response.data.attack.attacker.available_units) && (i<=3);i++)
 								choose_units_button += '<input  type="radio" name="" value="1" /> ' + i + '<br />';
-							choose_units_button +='<input type="submit" value="Scegli"/></form>';
+							choose_units_button +='<input id="choose_units"type="submit" value="Scegli"/></form>';
 						
 							var choosen_units = $("input[name='units']:checked").val();
 							$('#result').append(choose_units_button);	
-							$('#launch_die').click(function(event) {
+							$('#choose_units').click(function(event) {
 									event.preventDefault();
 									$.ajax({cache: false,
-									url : "index.php?action=attackers_unit_choose",
-									data: {'units' : choosen_units},
+									url : "index.php",
+									data: {'action':'attackers_unit_choose','units' : choosen_units},
 									dataType: "json",
 									success: function() { }
 									});

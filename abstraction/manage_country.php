@@ -265,9 +265,10 @@ function get_country_code_and_owner($game_id, $country_name)
 	global $table_name_country;
 
 	$country_info = array();
-	$sql_string = "SELECT c.iso_code ,c.name, i.porder, i.number_units  FROM $table_name_gamer_country i, $table_name_country c WHERE (c.name =\"$country_name\") AND (c.iso_code = i.ext_iso_country) AND (i.ext_id_game = $game_id)";	
+	$sql_string = "SELECT c.iso_code ,c.name, i.porder, i.number_units  FROM $table_name_gamer_country i, $table_name_country c WHERE (c.name LIKE\"%$country_name%\") AND (c.iso_code = i.ext_iso_country) AND (i.ext_id_game = $game_id)";	
 	
 	$result = mysql_query($sql_string);
+	echo $sql_string;
 	if ($result)
 	{
 
