@@ -29,7 +29,52 @@
 			$return = json_encode(array ('status'=>"game", "substatus"=>"defense", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
-		case "defender_unit_choose"
+		case "roll_dice":
+			$player_order = get_gamer_order(session_id());
+			$status = get_current_turn_and_action(session_id());
+			//Prelevo le unità usate per difendere ed attacare
+			$data  = unserialize($status["data"]);
+			$attack_units = $data["attack"]["attacker"]["choosen_units"];
+			if ($attack_units <= $data["attack"]["defender"]["available_units"])
+				$defender_units = $attack_units;
+			else
+				$defender_units = $data["attack"]["defender"]["available_units"];
+			
+			$defender_roll = array();
+			$attacker_roll = array();
+			
+			//Tiro i dadi per l'attaccante
+			for ($i = 0; $i < $attack_units; $i++)
+			{
+				$attacker_roll[$i] = rand(1,6);
+			}
+			
+			for ($i = 0; $i < $defender_units; $i++)
+			{
+				$defender_roll[$i] = rand(1,6);
+			}
+			
+			//Ordino gli array
+			rsort($attacker_roll);
+			rsort($defender_roll);			
+			
+			//Scorro l'array dei risultati del difensore che è sicuramente il più piccolo o uguale per il bilancio dell'attacco
+			$attacker_units_delta = 0;
+			$defender_units_delta = 0;
+			foreach ($defender_roll as $key=>$value)
+			{
+				if ($value >= $attacker_roll[$key])
+				{	$attacker_units_delta--; }
+				else
+				{	$defender_units_delta--; }
+			}
+			
+			//Vedo i vincitori ed i vinti e imposto i nuovi valori delle unità per gli stati
+			echo "attacker loose " . $attacker_units_delta;
+			print_r($attacker_roll);
+			echo "defender loose " . $defender_units_delta;			
+			print_r($defender_roll);			
+			//Visualizzo il risultato
 			return new ReturnedArea("game","game","defense");
 			break;		
 	}

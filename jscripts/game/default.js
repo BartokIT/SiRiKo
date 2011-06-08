@@ -399,18 +399,19 @@ function logica_gioco(response, textStatus, jqXHR)
 						
 						if (response.data.gamer_order == response.data.attack.defender.player )
 						{
-							var choose_units_button = 'Scegli con quante unità ti vuoi difendere<form action="#">';
-							for ( i= response.data.attack.attacker.choosen_units; (i <=  response.data.attack.defender.available_units) && (i<=3);i++)
-								choose_units_button += '<input  type="radio" name="choosen_units" value="'+ i + '" /> ' + i + '<br />';
-							choose_units_button +='<input id="choose_units"type="submit" value="Scegli"/></form>';
+							var choose_units_button = 'Ti difenderai con ';
+							if ( response.data.attack.attacker.choosen_units <= response.data.attack.defender.available_units)
+								choose_units_button += response.data.attack.attacker.choosen_units + " unita <br/>";
+							else
+								choose_units_button += response.data.attack.defender.available_units+ " unita <br/>";							
+								choose_units_button +='<a id="choose_units" href="#">Procedi</a>';
 			
 							$('#result').append(choose_units_button);	
 							$('#choose_units').click(function(event) {
-									var choosen_units = $("input[name='choosen_units']:checked").val();								
 									event.preventDefault();
 									$.ajax({cache: false,
 									url : "index.php",
-									data: {'action':'defender_unit_choose','choosen_units' : choosen_units },
+									data: {'action':'roll_dice' },
 									dataType: "json",
 									success: function() { }
 									});

@@ -17,7 +17,7 @@
 			//Controllo se non sono in un nuovo 
 			if ($game_info["status"] != "init")
 			{
-				return new ReturnedArea("game", $game_info["status"]);
+				return new ReturnedArea("game", $game_info["status"],$game_info["substatus"]);
 			}
 			
 			if ($game_info["data"] != "")
