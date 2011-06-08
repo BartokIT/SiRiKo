@@ -185,7 +185,8 @@ function check_same_status(previous_status, current_status)
 
 var previous_response ={};
 var units_maker= new Array();
-function drawMarkers(response)
+
+function drawMarkers(response, all_false)
 {
 	var geocoder = new google.maps.Geocoder();
 	var units = response.data.units;
@@ -212,7 +213,7 @@ function drawMarkers(response)
 					});
 				
 					//Imposto draggabili solamente i marker per i giocatore corrente e per le sue nazioni
-					if ((player == response.data.gamer_order) && response.data.gamer_turn)
+					if ((player == response.data.gamer_order) && response.data.gamer_turn && !all_false)
 					{ units_maker[iso_code]["marker"].setDraggable(true); }
 				
 					//Nel momento in cui è rilasciato viene riportato alla posizione originale
@@ -333,7 +334,7 @@ function logica_gioco(response, textStatus, jqXHR)
 				switch (response.substatus)
 				{
 					case "thinking":
-							drawMarkers(response);
+							drawMarkers(response,false);
 		
 							break;
 					case "attacking":					
@@ -341,13 +342,14 @@ function logica_gioco(response, textStatus, jqXHR)
 						var count = 0;
 						if (units_maker.length == 0)
 						{
-							drawMarkers(response);
+							console.log("Redraw");
+							drawMarkers(response,true);
 						}
-						
+						/*console.log("Redrawed " + units_maker.length + ' marker');
 						$.each(units_maker, function(index,value) {
 							value["marker"].setDraggable(false);
-							count++;
-						});
+							console.log(count++);
+						})*/;
 						
 						//Aggiungo all'interfaccia la scelta del numero di unità da attaccare
 						$('#result').empty();
@@ -355,16 +357,18 @@ function logica_gioco(response, textStatus, jqXHR)
 						{
 							var choose_units_button = 'Scegli con quante unità attaccare<form action="#">';
 							for ( i=1; (i <=  response.data.attack.attacker.available_units) && (i<=3);i++)
-								choose_units_button += '<input  type="radio" name="" value="1" /> ' + i + '<br />';
+								choose_units_button += '<input  type="radio" name="choosen_units" value="'+ i + '" /> ' + i + '<br />';
 							choose_units_button +='<input id="choose_units"type="submit" value="Scegli"/></form>';
 						
-							var choosen_units = $("input[name='units']:checked").val();
+
+
 							$('#result').append(choose_units_button);	
 							$('#choose_units').click(function(event) {
+									var choosen_units = $("input[name='choosen_units']:checked").val();								
 									event.preventDefault();
 									$.ajax({cache: false,
 									url : "index.php",
-									data: {'action':'attackers_unit_choose','units' : choosen_units},
+									data: {'action':'attackers_unit_choose','choosen_units' : choosen_units },
 									dataType: "json",
 									success: function() { }
 									});
@@ -381,6 +385,48 @@ function logica_gioco(response, textStatus, jqXHR)
 							choose_units_button += response.data.attack.attacker.player + ' sta attaccando il giocatore ' + response.data.attack.defender.player ;
 							$('#result').append(choose_units_button);	
 						}
+						break;
+					case 'defense':
+					//Imposto i marker a non draggabili		
+						if (units_maker.length == 0)
+						{
+							console.log("Redraw");
+							drawMarkers(response,true);
+						}
+						
+						//Aggiungo all'interfaccia la scelta del numero di unità da attaccare
+						$('#result').empty();
+						
+						if (response.data.gamer_order == response.data.attack.defender.player )
+						{
+							var choose_units_button = 'Scegli con quante unità ti vuoi difendere<form action="#">';
+							for ( i= response.data.attack.attacker.choosen_units; (i <=  response.data.attack.defender.available_units) && (i<=3);i++)
+								choose_units_button += '<input  type="radio" name="choosen_units" value="'+ i + '" /> ' + i + '<br />';
+							choose_units_button +='<input id="choose_units"type="submit" value="Scegli"/></form>';
+			
+							$('#result').append(choose_units_button);	
+							$('#choose_units').click(function(event) {
+									var choosen_units = $("input[name='choosen_units']:checked").val();								
+									event.preventDefault();
+									$.ajax({cache: false,
+									url : "index.php",
+									data: {'action':'defender_unit_choose','choosen_units' : choosen_units },
+									dataType: "json",
+									success: function() { }
+									});
+									getServerStatus();
+							});
+						} else if (response.data.gamer_order == response.data.attack.attacker.player )
+						{
+							var choose_units_button = 'Il giocatore ';
+							choose_units_button += response.data.attack.defender.player + ' si sta difendendo dal tuo attacco';
+							$('#result').append(choose_units_button);	
+						
+						} else {
+							var choose_units_button = 'Il giocatore ';
+							choose_units_button += response.data.attack.defender.player + ' si sta difendendo dal giocatore ' + response.data.attack.attacker.player ;
+							$('#result').append(choose_units_button);	
+						}						
 				}
 			
 		}

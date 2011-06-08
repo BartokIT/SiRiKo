@@ -68,7 +68,7 @@
 				
 				set_current_status($game_info["id_game"], "game", "thinking", serialize(array()),$min_player["order"], 0);
 				echo "OK";
-				return new ReturnedArea("game", "game");
+				return new ReturnedArea("game", "game","thinking");
 				//return new ReturnedArea("game", "init", "trow_dice");
 			}
 			else

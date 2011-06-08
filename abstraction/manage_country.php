@@ -117,8 +117,8 @@ function get_units_disposition($id_game)
 			//Suddivido per player
 			if (!isset($units_dispos[(int)$row[0]]))
 				$units_dispos[(int)$row[0]] = array();	
-			
-			$units_dispos[(int)$row[0]][$row[1]]=array("country"=>$row[3], "units"=>$row[2]);
+			$country = explode(" ",$row[3] );
+			$units_dispos[(int)$row[0]][$row[1]]=array("country"=>$country[0], "units"=>$row[2]);
 		}
 	}
 	else
