@@ -12,7 +12,6 @@ define("TOTAL_UNITS", 50);
 include("support.php");
 
 //inclusione libreria, nel caso in cui è installata l'estensione mb_string è semplicemente un wrapper
-require_once 'utf8/utf8.php';
 setlocale(LC_COLLATE, 'C');	
 
 //$stringa = 'Iñtër  nâtiônàl\'izætiøn Haendel and also Hàndel dell\'orto';
