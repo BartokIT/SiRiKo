@@ -207,6 +207,7 @@ function drawMarkers(response, all_false)
 					units_maker[iso_code]["player"] = player;
 					units_maker[iso_code]["original_position"] = results[0].geometry.location;
 					units_maker[iso_code]["marker"] = new google.maps.Marker({
+						icon: 'presentation/image/marker_player_' + player + '.png',
 						map: map,
 						position: results[0].geometry.location,
 						title: "Unità stanziate: " + info.units												
