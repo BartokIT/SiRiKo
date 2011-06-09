@@ -251,7 +251,9 @@ class Flusso
 					add_to_debug("Classe restituita", $ret_object);
 					add_to_debug("Numero di cicli", $count);
 					$this->page =  "presentation/" . $this->get_site_view() . "/" . $this->get_area() . "/" . $ret_object->page; 
-					return "presentation/" . $this->get_site_view() . "/" . $this->get_area() . "/" . $ret_object->page ;
+					if ($ret_object->parameter != null)
+						$p= $ret_object->parameter;
+					include($this->page);
 				}
 			}
 	}

@@ -9,11 +9,11 @@
 	{
 		default:
 		case "":
-			return new ReturnedPage("home.php");		
+			$games = get_opened_games();
+			return new ReturnedPage("enter_game.php", array("games"=>$games));		
+//			return new ReturnedArea("public", "default");
 			break;
-		case "enter":
-			return new ReturnedArea("public", "default", "enter_game");
-			break;			
+			
 	}
 
 

@@ -4,7 +4,7 @@
 */
 function inizializza()
 {
-	return new ReturnedArea("game","default");	
+	return new ReturnedArea("public","default");	
 }
 
 define("INDEX", basename($_SERVER['SCRIPT_FILENAME']));
@@ -20,8 +20,8 @@ $table_prefix = "idx_";
 
 //genero nuovo flusso di esecuzione
 $new = new Flusso("siriko","nodo_principale");
-$nome_file = $new->elaborates();
-
+$new->elaborates();
+/*
 
 	echo "<pre>";
 	echo "SESSION ";
@@ -36,7 +36,7 @@ $nome_file = $new->elaborates();
 	
 	
 	echo "</pre>";
-
-include($nome_file);
+*/
+//include($nome_file);
 
 ?>
