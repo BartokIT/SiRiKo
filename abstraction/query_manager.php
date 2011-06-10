@@ -9,36 +9,6 @@ $table_name_country = "game_country";
 $table_name_status = "game_status";
 
 /**
-* Controlla se un utente sta partecipando ad un gioco.
-* @return int Restituisce -1 se non sta partecipando a nessun gioco, altrimenti restituisce il numero di partita
-*/
-function is_in_game($id_participant)
-{
-	$table_name="game_participants";
-	$user_id = mysql_escape_string($id_participant);
-	$sql_string="SELECT ext_game, user_session FROM $table_name WHERE user_session =\"$user_id\"";
-	
-	$result = mysql_query($sql_string);
-	if ($result)
-	{
-		if (mysql_num_rows($result))
-		{
-			$row=mysql_fetch_row($result);
-			return $row[0];
-		}
-		else
-		{
-			return -1;
-		}
-	}
-	else
-	{
-		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
-	}	
-}
-
-
-/**
 * Questa funzione restituisce l'elenco dei partecipanti alla partita
 */
 function get_gamers($id_game)
