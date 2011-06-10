@@ -1,6 +1,7 @@
 <?php
 
 require_once("manage_country.php");
+require_once("manage_games.php");
 
 $table_name_gamer_country = "gamer_country_info";
 $table_name_participant="game_participants";
@@ -36,31 +37,7 @@ function is_in_game($id_participant)
 	}	
 }
 
-/**
-* Restituisce l'elenco delle partite in corso.
-* @return array
-*/
-function get_id_games()
-{
-	$table_name="game_status";
-	$sql_string="SELECT id_game FROM $table_name";
-	$array_games= array();
-	
-	$result = mysql_query($sql_string);
-	if ($result)
-	{
-		while ($row=mysql_fetch_row($result))
-		{
-			$array_games[] = $row[0];
-		}
-	}
-	else
-	{
-		die("#1 - impossibile ottenere l'elenco dei partecipanti  " . mysql_error());
-	}
-	
-	return $array_games;
-}
+
 /**
 * Questa funzione restituisce l'elenco dei partecipanti alla partita
 */
@@ -297,6 +274,7 @@ function get_gamer_order($user_session)
 	
 	return $gamer_order;
 }
+
 /**
 * Restituisce l'order del prossimo gamer. Se non c'è alcun prossimo allora restituisce -1;
 * @return int

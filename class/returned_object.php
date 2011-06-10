@@ -11,10 +11,13 @@
 	class ReturnedPage extends ReturnedObject
 	{
 		public $page;
+		public $parameter;
 		public $name_class = __CLASS__;
-		function __construct($page)
+		function __construct($page, $parameter = null)
 		{
 			$this->page = $page;
+			if ($parameter != null)
+				$this->parameter = $parameter;
 		}
 	}
 	
