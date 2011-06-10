@@ -1,6 +1,4 @@
 <?php
-
-
 $table_name_gamer_country = "gamer_country_info";
 $table_name_participant="game_participants";
 $table_name_country = "game_country";
@@ -41,7 +39,9 @@ function get_opened_games()
 	global $table_name_participant;
 	
 	//$sql_string="SELECT s.game_name FROM $table_name_status s, $table_name_participant p WHERE (s.status=\"init\") AND (s.substatus!=\"trow_dice\") AND (s.id_game=p.ext_game)";
-	$sql_string="SELECT s.game_name FROM $table_name_status s WHERE (s.status=\"init\") AND (s.substatus!=\"trow_dice\")";	
+	//$sql_string="SELECT s.game_name FROM $table_name_status s WHERE (s.status=\"init\") AND (s.substatus!=\"trow_dice\")";
+	$sql_string="SELECT s.game_name, s.id_game, count(s.id_game) as count_gamer, s.status, s.substatus FROM $table_name_status s LEFT JOIN $table_name_participant p ON p.ext_game = s.id_game WHERE s.status=\"init\" AND s.substatus!=\"trow_dice\" GROUP BY s.id_game";
+	//echo $sql_string;	
 	$array_games= array();
 	
 	$result = mysql_query($sql_string);
@@ -49,7 +49,7 @@ function get_opened_games()
 	{
 		while ($row=mysql_fetch_row($result))
 		{
-			$array_games[] = array("name" =>$row[0]);
+			$array_games[] = array("name" =>$row[0], "id"=>$row[1], "players"=>$row[2]);
 		}
 	}
 	else
@@ -151,7 +151,7 @@ function is_in_initiated_game()
 	
 	$user_id = mysql_escape_string(session_id());
 	$sql_string="SELECT s.id_game, s.status, s.substatus FROM $table_name_participant p LEFT JOIN $table_name_status s ON p.ext_game = s.id_game WHERE (user_session =\"" . $user_id . "\" )";
-	
+
 	$result = mysql_query($sql_string);
 	if ($result)
 	{

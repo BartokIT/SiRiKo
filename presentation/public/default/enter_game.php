@@ -42,10 +42,10 @@
 				  	</thead>
 				  	<tbody>
 					<?php
-					  	foreach($p["games"] as $i=>$value)
+					  /*	foreach($p["games"] as $i=>$value)
 					  	{
-					  		echo "<tr><td>". $value["name"] . "</td><td></td><td></td></tr>";	
-					  	}
+					  		echo "<tr><td>". $value["name"] . "</td><td>". $value["players"] . "</td><td></td></tr>";	
+					  	}*/
 					  ?>  		  	
 				  	</tbody>
 				  </table>
