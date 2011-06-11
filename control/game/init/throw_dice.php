@@ -42,9 +42,17 @@
 			break;
 			
 		case "launch_die":
+		
+			//Con il generatore casuale genero il lancio del dado
 			$roll = rand(1,6);
-			$game_info = get_current_turn_and_action(session_id());
 			
+			//Prelevo lo stato corrente dal database e l'utente con il turno corrente
+			//$game_info = get_current_turn_and_action(session_id());
+			$game_info =get_game_status_from_user();
+			$current_user = get_current_gamer();
+			
+			
+			//Inserisco il risultato del lancio nell'array
 			if ($game_info["data"] == "")
 			{
 				$status_data = array("dice"=>array( get_gamer_order(session_id())=>$roll));
@@ -75,7 +83,7 @@
 			else
 			{
 				//Prendo il prossimo partecipante e gli passo lo stato attivo
-				$next_gamer = get_next_gamer($game_info["id_game"], $game_info["current_gamer"]);
+				$next_gamer = get_next_gamer($game_info["id_game"], $current_user);
 			
 				set_next_gamer($game_info["id_game"], $next_gamer);
 				return new ReturnedArea("game", "init", "throw_dice");

@@ -346,7 +346,7 @@ function get_game_status_from_user()
 
 	$game_status = array();
 	$user_id = mysql_escape_string(session_id());
-	$sql_string="SELECT s.id_game, s.status, s.substatus FROM $table_name_participant p, $table_name_status s WHERE (p.ext_game = s.id_game) AND (p.user_session =\"" . session_id() . "\" )";
+	$sql_string="SELECT s.id_game, s.status, s.substatus, s.data FROM $table_name_participant p, $table_name_status s WHERE (p.ext_game = s.id_game) AND (p.user_session =\"" . session_id() . "\" )";
 
 	$result = mysql_query($sql_string);	
 
@@ -357,7 +357,8 @@ function get_game_status_from_user()
 			$row = mysql_fetch_row($result);
 			$game_status["id_game"]=$row[0];
 			$game_status["status"]=$row[1];
-			$game_status["substatus"]=$row[2];			
+			$game_status["substatus"]=$row[2];
+			$game_status["data"]=$row[3];									
 		}
 	}
 	else
@@ -367,3 +368,5 @@ function get_game_status_from_user()
 	
 	return $game_status;
 }
+
+?>
