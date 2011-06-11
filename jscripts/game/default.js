@@ -75,6 +75,7 @@ function getServerStatus()
 {
 		$.ajax({cache: false,
 		url : "index.php",
+		data: {"game_logic":"1"},
 		dataType: "json",
 		success: logica_gioco
 		});
@@ -293,7 +294,7 @@ function logica_gioco(response, textStatus, jqXHR)
 						});
 						}
 				} //Altrimenti se sono nel sottostato trow_dice ho iniziato la procedura di lancio dei dadi
-				else if (response.substatus == "trow_dice")
+				else if (response.substatus == "throw_dice")
 				{
 					//Con questa visualizzo i dadi appena lanciati
 					if (response.data.dice)

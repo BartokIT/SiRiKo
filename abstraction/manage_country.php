@@ -98,6 +98,7 @@ function assign_country($id_game, $player, $country_code,$units )
 				die("#3 - [assign_country] impossibile aggiornare una assegnazione per lo stato $country_code - " . mysql_error());
 	}	
 }
+
 /**
 * Funzione che restituisce le unità disposte su ciascun territorio, suddivise prima per giocatore e poi per nazione
 */
@@ -128,6 +129,7 @@ function get_units_disposition($id_game)
 	
 	return $units_dispos;
 }
+
 /*
 * Restituisce l'insieme dei codici  delle nazioni vicine a quella passata
 **/

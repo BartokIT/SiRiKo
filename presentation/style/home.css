@@ -99,5 +99,10 @@ body
 
 #gamer_table
 {
-	width: 100%;
+	width: 800px;
+}
+
+#games
+{
+	text-align:left;
 }

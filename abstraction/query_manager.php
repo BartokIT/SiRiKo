@@ -57,64 +57,7 @@ function get_co_gamers($user_session_id)
 	
 	return $array_games;
 }
-/**
-* Inserisce un giocatore in una partita 
-*/
-function insert_user_in_game($user_id, $game_id = -1)
-{
-	$table_name_participant="game_participants";
-	$table_name_status="game_status";
-	$user_id = mysql_escape_string($user_id);
-	// Se non passo alcun game id allora ne assegno uno nuovo
-	if ($game_id == -1)
-	{
-		$game_id = 0;
-		$sql_string_game_id = "SELECT MAX(id_game) FROM  $table_name_status";
-		$result = mysql_query($sql_string_game_id);
-		if (!$result)
-		{	die("#2 - impossibile ottenere la lista delle partite in corso  " . mysql_error());
-		}
-		else
-		{
-			if (mysql_num_rows($result))
-			{
-				$row=mysql_fetch_row($result);
-				if ($row[0] != null)
-					$game_id = $row[0] + 1;
-			}			
-		
-			$sql_string_game_id = "INSERT INTO $table_name_status(id_game, round, gamer, status) VALUE ($game_id, 0, 1,\"init\")";
-			$result = mysql_query($sql_string_game_id);
-			if (!$result)
-				die("#3 - impossibile aggiungere una nuova partita  " . mysql_error());
-						
-		}
-	}
-	
-	//Cerco qualè l'ordine dell'ultimo giocatore inserito nel gioco
-	$player_order = 1;
-	$sql_string_order = "SELECT MAX(porder) FROM  $table_name_participant WHERE (ext_game = $game_id)";
-	$result = mysql_query($sql_string_order);
-	if (!$result)
-		die("#4 - impossibile ottenere un ordinamento per la partita " . mysql_error());
-	else
-	{
-		if (mysql_num_rows($result))
-		{
-			$row=mysql_fetch_row($result);
-			if ($row[0] != null)
-				$player_order = $row[0] + 1;
-		}
-		
-	}
-	
-	$sql_string_participant = "INSERT INTO  $table_name_participant(ext_game, user_session, porder) VALUE ($game_id,\"$user_id\", $player_order)";
-	$result = mysql_query($sql_string_participant);
-	
-	if (!$result)
-		die("#5 - impossibile aggiungere l'utente al gioco  " . mysql_error());
-	
-}
+
 
 /**
 * Funzione che permette di sapere se l'utente corrente è quello con id più basso
@@ -171,7 +114,9 @@ function get_first_gamer($game_id)
 	$gamer = array();
 	$table_name_participant="game_participants";
 	
-	$sql_string="SELECT p.porder, p.user_session FROM $table_name_participant p WHERE (p.ext_game = $game_id) AND (p.porder = ( SELECT MIN(pmin.porder) FROM $table_name_participant pmin))";
+	$sql_string="SELECT p.porder, p.user_session FROM $table_name_participant p WHERE (p.ext_game = $game_id) AND (p.porder = ( SELECT MIN(pmin.porder) FROM $table_name_participant pmin WHERE (pmin.ext_game = $game_id)))";
+	
+	
 	$result = mysql_query($sql_string);
 
 	if ($result)
@@ -292,6 +237,7 @@ function set_next_gamer($game_id, $user_order)
 
 /**
 * Restituisce lo stato corrente della partita
+* @deprecated @XXX: cercare di sostituire con get_game_status_from_user()
 */
 function get_current_turn_and_action($user_id)
 {
@@ -300,7 +246,7 @@ function get_current_turn_and_action($user_id)
 	$table_name_status="game_status";
 	
 	$sql_string="SELECT s.round, s.gamer, s.status, i.user_session, s.id_game, s.substatus, s.data FROM $table_name_status s, $table_name_participant p, $table_name_participant i  WHERE (p.ext_game = s.id_game) AND (p.user_session =\"$user_id\") AND (i.porder = s.gamer)";
-	
+
 	$result = mysql_query($sql_string);
 	if ($result)
 	{
@@ -308,6 +254,7 @@ function get_current_turn_and_action($user_id)
 		if (mysql_num_rows($result))
 		{
 			$row=mysql_fetch_row($result);
+
 			$current_status["round"] = $row[0];
 			$current_status["current_gamer"] = $row[1];
 			$current_status["status"] = $row[2];

@@ -33,8 +33,8 @@
 			break;
 		case "init_dice_launch":
 			$game_info = get_current_turn_and_action(session_id());
-			set_current_status($game_info["id_game"], "init", "trow_dice");
-			return new ReturnedArea("game", "init", "trow_dice");
+			set_current_status($game_info["id_game"], "init", "throw_dice");
+			return new ReturnedArea("game", "init", "throw_dice");
 			
 	}
 

@@ -2,25 +2,51 @@
 /**
 * Funzione per inizializzare l'area e la site view
 */
-function inizializza()
+
+if (isset($_REQUEST["game_logic"]))
 {
-	return new ReturnedArea("public","default");	
+	function inizializza()
+	{
+		return new ReturnedArea("game","init", "throw_dice");	
+	}
+
+	define("INDEX", basename($_SERVER['SCRIPT_FILENAME']));
+	define("TOTAL_UNITS", 50);
+	include("support.php");
+
+	//inclusione libreria, nel caso in cui è installata l'estensione mb_string è semplicemente un wrapper
+	setlocale(LC_COLLATE, 'C');	
+
+	//$stringa = 'Iñtër  nâtiônàl\'izætiøn Haendel and also Hàndel dell\'orto';
+	$table_prefix = "idx_";
+
+
+	//genero nuovo flusso di esecuzione
+	$flusso = new Flusso("siriko_logic","nodo_principale");
+	$flusso->elaborates();
 }
+else
+{
+	function inizializza()
+	{
+		return new ReturnedArea("public","default");	
+	}
 
-define("INDEX", basename($_SERVER['SCRIPT_FILENAME']));
-define("TOTAL_UNITS", 50);
-include("support.php");
+	define("INDEX", basename($_SERVER['SCRIPT_FILENAME']));
+	define("TOTAL_UNITS", 50);
+	include("support.php");
 
-//inclusione libreria, nel caso in cui è installata l'estensione mb_string è semplicemente un wrapper
-setlocale(LC_COLLATE, 'C');	
+	//inclusione libreria, nel caso in cui è installata l'estensione mb_string è semplicemente un wrapper
+	setlocale(LC_COLLATE, 'C');	
 
-//$stringa = 'Iñtër  nâtiônàl\'izætiøn Haendel and also Hàndel dell\'orto';
-$table_prefix = "idx_";
+	//$stringa = 'Iñtër  nâtiônàl\'izætiøn Haendel and also Hàndel dell\'orto';
+	$table_prefix = "idx_";
 
 
-//genero nuovo flusso di esecuzione
-$new = new Flusso("siriko","nodo_principale");
-$new->elaborates();
+	//genero nuovo flusso di esecuzione
+	$flusso = new Flusso("siriko","nodo_principale");
+	$flusso->elaborates();
+}
 /*
 
 	echo "<pre>";

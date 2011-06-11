@@ -37,7 +37,7 @@
 				  		<tr>
 				  			<th>Nome</th>
 				  			<th>Partecipanti</th>
-				  			<th>Partecipa</th>
+				  			<th></th>
 				  		</tr>
 				  	</thead>
 				  	<tbody>
