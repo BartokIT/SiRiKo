@@ -99,9 +99,17 @@ jQuery.fn.compareArray = function(t) {
 
 function check_same_status(previous_status, current_status)
 {
+	
 	var return_value = true;
 	$.each(current_status, function(key, value)
 	{
+		if (previous_status == null)
+		{
+			
+			return_value = false;
+			return false;
+		}
+		
 		//Se non esiste la chiave restituisco diversi
 		if (!previous_status.hasOwnProperty(key))
 		{
@@ -132,7 +140,7 @@ function check_same_status(previous_status, current_status)
 		else	
 		{
 			
-			if (current_status[key] != value)
+			if (previous_status[key] != value)
 			{
 				return_value = false;
 				return false;
@@ -172,8 +180,7 @@ function check_same_status(previous_status, current_status)
 		}
 		else	
 		{
-			
-			if (previous_status[key] != value)
+			if (current_status[key] != value)
 			{
 				return_value = false;
 				return false;
@@ -435,7 +442,41 @@ function logica_gioco(response, textStatus, jqXHR)
 							var choose_units_button = 'Il giocatore ';
 							choose_units_button += response.data.attack.defender.player + ' si sta difendendo dal giocatore ' + response.data.attack.attacker.player ;
 							$('#result').append(choose_units_button);	
-						}						
+						}
+						break;
+					case 'attack/view_attack_result':
+							var view_result = '';
+							if (units_maker.length == 0)
+							{
+								//console.log("Redraw");
+								drawMarkers(response,true);
+							}
+							if (response.data.attack.attacker.result < 0)
+							{
+								view_result += "L'attaccante ha perso n. " + (-1*response.data.attack.attacker.result) + " unita'";
+							}
+							
+							if (response.data.attack.defender.result > 0)
+							{
+								view_result += "Il difensore ha perso n. " + (-1*response.data.attack.defender.result) + " unita'";
+							}
+							
+							$('#result').append(view_result);	
+							window.setTimeout(function()
+							{
+
+								$.ajax({cache: false,
+									url : "index.php",
+									data: {'action':'end_view',"game_logic":"1"},
+									dataType: "json",
+									success: function()
+									{
+
+									}
+									});
+									
+							}, 5000 );
+						break;						
 				}
 			
 		}

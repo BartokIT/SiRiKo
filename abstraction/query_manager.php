@@ -61,7 +61,9 @@ function set_current_status($id_game, $status, $substatus = null, $data=null, $g
 
 	if ($substatus == null)
 		$substatus = "";
-
+	else
+		$substatus = mysql_escape_string($substatus);
+		
 	if ($gamer !== null)
 		$sql_string_assignments	.= " , gamer= $gamer";
 

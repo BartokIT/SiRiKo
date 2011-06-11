@@ -10,11 +10,15 @@
 		default:
 		case "":
 
+
 			$player_order = get_gamer_order(session_id());
 			$status = get_current_turn_and_action(session_id());
 			$units= get_units_disposition($status["id_game"]);
 			$data  = unserialize($status["data"]);
 			
+			if ($status["substatus"] != "defense")
+					return new ReturnedArea("game","game","attack/view_attack_result");
+					
 			if ($player_order == $data["attack"]["defender"]["player"])
 				$currently_playing = true;
 			else
@@ -73,19 +77,34 @@
 			//Visualizzo l'esito dell'attacco
 			$data["attack"]["attacker"]["result"] = $attacker_units_delta;
 			$data["attack"]["defender"]["result"] = $defender_units_delta;
-			set_current_status($status["id_game"], $status["status"], $status["substatus"], $data);
+			set_current_status($status["id_game"], $status["status"], $status["substatus"],serialize($data));
 			//Recupero le informazioni sulle nazioni coinvolte
 			$attacker_country=get_country_units_and_owner($status["id_game"],$data["attack"]["attacker"]["country"]["iso_code"]);
 			$defender_country=get_country_units_and_owner($status["id_game"],$data["attack"]["defender"]["country"]["iso_code"]);
 			
-			set_units($status["id_game"], $data["attack"]["attacker"]["country"]["iso_code"], $attacker_country["units"] + $attacker_units_delta);
+			//Imposto le unità per la nazione del difensore
 			set_units($status["id_game"], $data["attack"]["defender"]["country"]["iso_code"], $defender_country["units"] + $defender_units_delta);			
-			echo "attacker loose " . $attacker_units_delta;
-			print_r($attacker_roll);
-			echo "defender loose " . $defender_units_delta;			
-			print_r($defender_roll);			
+			
+			//Recupero il nuovo valore per le unita
+			$defender_country=get_country_units_and_owner($status["id_game"],$data["attack"]["defender"]["country"]["iso_code"]);
+			
+			//Se non ci sono più unità ho conquistato la nazione
+			if ($defender_country["units"] == 0)
+			{
+				//Levo una unità in più all'attaccante per metterla sul nuovo territorio 
+				set_units($status["id_game"], $data["attack"]["attacker"]["country"]["iso_code"], $attacker_country["units"] + $attacker_units_delta - 1);
+				
+				//Imposto l'attaccante come proprietario della nazione che era del difensore
+				assign_country($status["id_game"], $data["attack"]["attacker"]["player"], $data["attack"]["defender"]["country"]["iso_code"],1 );
+			}
+			else
+			{
+				set_units($status["id_game"], $data["attack"]["attacker"]["country"]["iso_code"], $attacker_country["units"] + $attacker_units_delta);
+			}
+			
+			set_current_status($status["id_game"], "game", "attack/view_attack_result");
 			//Visualizzo il risultato
-			return new ReturnedArea("game","game","defense");
+			return new ReturnedArea("game","game","attack/view_attack_result");
 			break;		
 	}
 
