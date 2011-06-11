@@ -1,5 +1,20 @@
 <?php
 
+
+function set_units($id_game, $iso_code, $units)
+{
+
+	//----- TABLES_NAME ----
+	global $table_name_gamer_country;
+	
+	$sql_string="UPDATE $table_name_gamer_country SET number_units=$units WHERE (ext_iso_country=\"$iso_code\") AND (ext_id_game	= " . $id_game .  ")";
+	
+	$result = mysql_query($sql_string);
+	if (!$result)
+	{
+		die("#1 - [set_units] impossibile aggiornare le unità " . mysql_error());		
+	}
+}
 /**
 * Funzione che assegna per un certo gioco le nazioni in maniera uniforme ai giocatori, filtrando il gioco per continente
 */

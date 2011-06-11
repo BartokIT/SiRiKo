@@ -237,8 +237,8 @@ function drawMarkers(response, all_false)
 										{
 													//Una volta rilasciato il marker eseguo l'azione di attacco
 													$.ajax({cache: false,
-													url : "index.php?action=attack",
-													data: {'attacker_iso_country' : iso_code, 'defender_country': value.long_name},
+													url : "index.php",
+													data: {"game_logic":"1",'attacker_iso_country' : iso_code, 'defender_country': value.long_name, "action":"attack"},
 													dataType: "json",
 													success: function() { }
 													});
@@ -289,7 +289,10 @@ function logica_gioco(response, textStatus, jqXHR)
 						$('#result').append(inizia_ordine_gioco_button);
 						$('#init_order_gamer').click(function(event) {
 							event.preventDefault();
-							$.ajax("index.php?action=init_dice_launch");
+							$.ajax("index.php",
+							{
+								data: {'action':'init_dice_launch',"game_logic":"1"}
+							});
 							getServerStatus();
 						});
 						}
@@ -311,7 +314,10 @@ function logica_gioco(response, textStatus, jqXHR)
 						$('#result').append(tira_dado_button);	
 						$('#launch_die').click(function(event) {
 								event.preventDefault();
-								$.ajax("index.php?action=launch_die");
+								$.ajax("index.php",
+								{ 
+									data: {'action': 'launch_die', "game_logic":"1" }
+								});
 								getServerStatus();
 							});
 					}
@@ -370,7 +376,7 @@ function logica_gioco(response, textStatus, jqXHR)
 									event.preventDefault();
 									$.ajax({cache: false,
 									url : "index.php",
-									data: {'action':'attackers_unit_choose','choosen_units' : choosen_units },
+									data: {'action':'attackers_unit_choose','choosen_units' : choosen_units,"game_logic":"1"},
 									dataType: "json",
 									success: function() { }
 									});
@@ -413,7 +419,7 @@ function logica_gioco(response, textStatus, jqXHR)
 									event.preventDefault();
 									$.ajax({cache: false,
 									url : "index.php",
-									data: {'action':'roll_dice' },
+									data: {'action':'roll_dice',"game_logic":"1"},
 									dataType: "json",
 									success: function() { }
 									});

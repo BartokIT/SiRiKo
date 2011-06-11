@@ -1,10 +1,10 @@
 <?php
-
+/*
 $table_name_gamer_country = "gamer_country_info";
 $table_name_participant="game_participants";
 $table_name_country = "game_country";
 $table_name_status = "game_status";
-
+*/
 /**
 * Questa funzione restituisce l'elenco dei partecipanti alla partita
 */

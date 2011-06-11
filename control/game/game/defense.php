@@ -69,7 +69,17 @@
 				{	$defender_units_delta--; }
 			}
 			
-			//Vedo i vincitori ed i vinti e imposto i nuovi valori delle unità per gli stati
+			//Vedo i vincitori ed i vinti e imposto i nuovi valori delle unità per gli stati		
+			//Visualizzo l'esito dell'attacco
+			$data["attack"]["attacker"]["result"] = $attacker_units_delta;
+			$data["attack"]["defender"]["result"] = $defender_units_delta;
+			set_current_status($status["id_game"], $status["status"], $status["substatus"], $data);
+			//Recupero le informazioni sulle nazioni coinvolte
+			$attacker_country=get_country_units_and_owner($status["id_game"],$data["attack"]["attacker"]["country"]["iso_code"]);
+			$defender_country=get_country_units_and_owner($status["id_game"],$data["attack"]["defender"]["country"]["iso_code"]);
+			
+			set_units($status["id_game"], $data["attack"]["attacker"]["country"]["iso_code"], $attacker_country["units"] + $attacker_units_delta);
+			set_units($status["id_game"], $data["attack"]["defender"]["country"]["iso_code"], $defender_country["units"] + $defender_units_delta);			
 			echo "attacker loose " . $attacker_units_delta;
 			print_r($attacker_roll);
 			echo "defender loose " . $defender_units_delta;			

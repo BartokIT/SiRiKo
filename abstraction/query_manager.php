@@ -1,13 +1,14 @@
 <?php
+$table_name_gamer_country = "gamer_country_info";
+$table_name_participant="game_participants";
+$table_name_country = "game_country";
+$table_name_status = "game_status";
 
 require_once("manage_country.php");
 require_once("manage_games.php");
 require_once("manage_gamer.php");
 
-$table_name_gamer_country = "gamer_country_info";
-$table_name_participant="game_participants";
-$table_name_country = "game_country";
-$table_name_status = "game_status";
+
 
 
 
@@ -61,13 +62,13 @@ function set_current_status($id_game, $status, $substatus = null, $data=null, $g
 	if ($substatus == null)
 		$substatus = "";
 
-	if ($gamer != null)
+	if ($gamer !== null)
 		$sql_string_assignments	.= " , gamer= $gamer";
 
-	if ($round != null)
+	if ($round !== null)
 		$sql_string_assignments	.= " , round= $round";
 	
-	if ($data != null)
+	if ($data !== null)
 	{
 		$data = mysql_escape_string($data);
 		$sql_string_assignments	.= " , data=\"$data\"";
