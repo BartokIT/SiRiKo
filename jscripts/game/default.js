@@ -190,6 +190,7 @@ function manageMarker(response, draggable)
 				{
 					
 					//Richiamo il geocoder per avere informazioni sulla posizione delle nazioni
+					console.log('Recall geocoder service for get country center');
 					geocoder.geocode( { 'address': country_info.country,
 									'language': 'en'},
 									function(results, status)
@@ -198,6 +199,7 @@ function manageMarker(response, draggable)
 									 if (status == google.maps.GeocoderStatus.OK)
 					  				 { 
 					  				 	console.log('Creo marker');
+					  				 	
 					  				   //Se il geocoder è ok posso creare il marker
 					  					SiRiKo.markers[iso_code] = {};
 					  					SiRiKo.markers[iso_code]['player'] = player;
@@ -206,17 +208,43 @@ function manageMarker(response, draggable)
 										var marker =  new google.maps.Marker({
 											icon: 'presentation/image/marker_player_' + player + '.png',
 											map: map,
-											position: position
-											//title: "Unità stanziate: " + info.units												
+											position: position,
+											title: "Unità stanziate: " + country_info.units
 										});
 										SiRiKo.markers[iso_code]['marker']=marker;
-					  					/*SiRiKo.markers[iso_code]['position'] = results[0].geometry.location;
-					  					SiRiKo.markers[iso_code]['marker'] = new google.maps.Marker({
-											icon: 'presentation/image/marker_player_' + player + '.png',
-											map: map,
-											position: results[0].geometry.location,
-											title: "Unità stanziate: " + info.units												
-										});*/	
+										
+										//Imposto se deve essere draggabile o meno
+										setDraggableMarker(player, response.data.gamer_order, response.data.gamer_turn, draggable, iso_code);
+
+										//Ora aggiungo il listener per la fine del drag
+										google.maps.event.addListener(marker,'dragend', function(event)
+										{
+											//Prima di tutto riporto il marker al centro della nazione
+											marker.setPosition(position);
+											
+											//Richiamo il geocoder per sapere su quale nazione è stato rilasciato
+											geocoder.geocode({'latLng': event.latLng, 'language': 'en'}, function(results, status) {
+											if (status == google.maps.GeocoderStatus.OK) {
+												//Reperisco il nome della nazione
+												var countryName = getCountryNameFromPosition(results);												
+												console.log('Marker released on ' + countryName);
+												
+												//Ordino alla logica di gioco di attaccare la nazione in questione
+												$.ajax({cache: false,
+													url : "index.php",
+													data: {"game_logic":"1",
+															'attacker_iso_country' : iso_code,
+															'defender_country': countryName,
+															"action":"attack"},
+													dataType: "json"
+													});
+											} else {
+												alert("Geocoder failed due to: " + status);
+											}
+											});
+
+										
+										});
 					  				 }
 					  				 else
 					  				 {
@@ -225,10 +253,50 @@ function manageMarker(response, draggable)
 					  				 }	
 									});					
 				}
-
+				else
+				{
+					//Se esiste devo controllare se devo renderlo draggabile o meno
+					setDraggableMarker(player, response.data.gamer_order, response.data.gamer_turn, draggable, iso_code);
+				}
 			
 			});
 	});
+}
+
+function setDraggableMarker(marker_owner, current_player, player_turn, draggable, iso_code)
+{
+				if ((marker_owner == current_player) && player_turn && draggable)
+				{
+					SiRiKo.markers[iso_code]['marker'].setDraggable(true);
+				}
+				else
+				{
+					SiRiKo.markers[iso_code]['marker'].setDraggable(false);
+				}
+}
+
+function getCountryNameFromPosition(results)
+{
+	var countryName='';
+	if (results[0]) {
+			$.each(results[1].address_components,function(index, value)
+			{
+				
+				$.each(value.types, function(index2, address_type)
+				{
+					if (address_type == 'country')
+						{
+							countryName= value.long_name;
+							return;
+						}
+				});
+			});
+		}
+	 else {
+		alert("Geocoder failed due to: " + status);
+	}
+
+	return countryName;
 }
 
 function drawMarkers(response, all_false)
