@@ -67,10 +67,13 @@
 			$defender_units_delta = 0;
 			foreach ($defender_roll as $key=>$value)
 			{
-				if ($value >= $attacker_roll[$key])
+				//Per test
+				$defender_units_delta--;
+				
+				/*if ($value >= $attacker_roll[$key])
 				{	$attacker_units_delta--; }
 				else
-				{	$defender_units_delta--; }
+				{	$defender_units_delta--; }*/
 			}
 			
 			//Vedo i vincitori ed i vinti e imposto i nuovi valori delle unità per gli stati		

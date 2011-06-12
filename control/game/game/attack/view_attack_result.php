@@ -26,6 +26,29 @@
 			$json_data["gamer_order"]= (int) $player_order;
 			$json_data["units"]= $units;
 			$json_data["attack"] =$data["attack"];
+			
+			
+			//Se c'è solo un indice allora sono il vincitore
+			if (count($units) == 1)
+			{
+				if (isset($units[$player_order]))
+				{
+					$json_data["result"]="winner";
+					$return = json_encode(array ('status'=>"game", "substatus"=>"endgame", "data"=>$json_data));
+					return new ReturnedAjax($return);
+					break;
+				}	
+			}
+			
+			//Controllo se ho ancora nazioni 
+			if (!isset($units[$player_order]))
+			{
+				$json_data["result"]="loser";
+				$return = json_encode(array ('status'=>"game", "substatus"=>"endgame", "data"=>$json_data));
+				return new ReturnedAjax($return);
+				break;
+			}
+			
 			$return = json_encode(array ('status'=>"game", "substatus"=>"attack/view_attack_result", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
