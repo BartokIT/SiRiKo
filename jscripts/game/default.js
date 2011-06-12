@@ -1,75 +1,52 @@
-function initialize() {
+var previous_response ={};
+var units_maker= new Array();
+var SiRiKo = {};
 
-    var chicago = new google.maps.LatLng(41.850033, 60.6500523);
+function initialize() {
+	
+	var chicago = new google.maps.LatLng(41.850033, 60.6500523);
 	var style =                                           
-[ { featureType: "transit.station", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "transit.line", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.province", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.highway", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.land_parcel", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "all", elementType: "all", stylers: [ ] } ];
+	[ { featureType: "transit.station", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "transit.line", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.province", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.highway", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.land_parcel", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "all", elementType: "all", stylers: [ ] } ];
 
 
 	var sirikoMapType = new google.maps.StyledMapType(
-      style, {name:"siriko"});
+	  style, {name:"siriko"});
 
-      
-    map = new google.maps.Map(document.getElementById('map_canvas'), {
-      center: chicago,
-      zoom: 3,
-      mapTypeId: 'terrain'
-    });
+	  
+	map = new google.maps.Map(document.getElementById('map_canvas'), {
+	  center: chicago,
+	  zoom: 3,
+	  mapTypeId: 'terrain'
+	});
 
 	map.mapTypes.set('terrain', sirikoMapType);
 
-     
-    layer = new google.maps.FusionTablesLayer({
-      query: {
-        select: 'kml_4326',
-        from: '931868',        
+	 
+	layer = new google.maps.FusionTablesLayer({
+	  query: {
+		select: 'kml_4326',
+		from: '931868',        
 		where: "Continent = 'EU'"
-      },   
-  styles: [{
-    polygonOptions: {
+	  },   
+	styles: [{
+	polygonOptions: {
 		fillColor: "#AA0022",
 		fillOpacity: 0.3,
 		strokeWeight: 1.0,
 		strokeColor: "#000000"
-    }
-  }],
-  suppressInfoWindows: true
-});
-
-layer.setMap(map);
-
-/*
-google.maps.event.addListener(layer, 'click', function(event) {
-	var country_iso_code = event.row["iso_a3"].value;
-	var web_service = "http://api.geonames.org/neighboursJSON?formatted=true&username=shadow_silver&country=" + country_iso_code;
-	console.log(web_service);
-	$.ajax({cache: false,
-		url : web_service,
-		dataType: "json",
-		success: get_neighbors
+	}
+	}],
+	suppressInfoWindows: true
 	});
-	var marker = new google.maps.Marker({
-        position: event.latLng,
-      	title:"Hello World!"
-  });
-  	marker.setMap(map);
-});
-*/
 
-function get_neighbors(response, textStatus, jqXHR)
-{
-	var neighbors = "";
-	$.each(response.geonames, function(index, value)
-	{
-		neighbors += value.name + "; ";
-	});
-	console.log(neighbors);
-}; 
-  
+	layer.setMap(map);
 
-  $('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
- $('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
+
+	$('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
+	$('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
 	window.setInterval(getServerStatus,5000);
 }
+/***** END INITIALIZE FUNCTION *****/
 
 function getServerStatus()
 {
@@ -191,8 +168,68 @@ function check_same_status(previous_status, current_status)
 	return return_value;
 }
 
-var previous_response ={};
-var units_maker= new Array();
+
+function manageMarker(response, draggable)
+{
+	//Creo il geocoder e le informazioni unità
+	var geocoder = new google.maps.Geocoder();
+	var units_info = response.data.units;
+	
+	//Ciclo sulle unità messe a disposizioen per ciascun giocatore
+	$.each(units_info, function (player, nations) {
+			$.each(nations, function(iso_code, country_info )
+			{
+				//Creo la variabile che deve contenere i markers
+				if (!SiRiKo.markers)
+				{
+					SiRiKo.markers = {};
+				}
+				
+				//Controllo se esiste il marker in questione se non esiste lo creo
+				if (!SiRiKo.markers.hasOwnProperty(iso_code))
+				{
+					
+					//Richiamo il geocoder per avere informazioni sulla posizione delle nazioni
+					geocoder.geocode( { 'address': country_info.country,
+									'language': 'en'},
+									function(results, status)
+									{
+
+									 if (status == google.maps.GeocoderStatus.OK)
+					  				 { 
+					  				 	console.log('Creo marker');
+					  				   //Se il geocoder è ok posso creare il marker
+					  					SiRiKo.markers[iso_code] = {};
+					  					SiRiKo.markers[iso_code]['player'] = player;
+										var position = results[0].geometry.location;
+										SiRiKo.markers[iso_code]['position']=position;
+										var marker =  new google.maps.Marker({
+											icon: 'presentation/image/marker_player_' + player + '.png',
+											map: map,
+											position: position
+											//title: "Unità stanziate: " + info.units												
+										});
+										SiRiKo.markers[iso_code]['marker']=marker;
+					  					/*SiRiKo.markers[iso_code]['position'] = results[0].geometry.location;
+					  					SiRiKo.markers[iso_code]['marker'] = new google.maps.Marker({
+											icon: 'presentation/image/marker_player_' + player + '.png',
+											map: map,
+											position: results[0].geometry.location,
+											title: "Unità stanziate: " + info.units												
+										});*/	
+					  				 }
+					  				 else
+					  				 {
+					  					alert('Problemi nel richiamare il geocoder');
+					  						//@TODO: Controllare il tipo di errore e prendere l'azione necessaria
+					  				 }	
+									});					
+				}
+
+			
+			});
+	});
+}
 
 function drawMarkers(response, all_false)
 {
@@ -349,17 +386,22 @@ function logica_gioco(response, textStatus, jqXHR)
 				switch (response.substatus)
 				{
 					case "thinking":
+							manageMarker(response, true);
+							/*
 							drawMarkers(response,false);
-		
+							*/	
 							break;
 					case "attacking":					
 						//Imposto i marker a non draggabili		
 						var count = 0;
-						if (units_maker.length == 0)
+						manageMarker(response, true);
+						
+						/*if (units_maker.length == 0)
 						{
 							console.log("Redraw");
 							drawMarkers(response,true);
-						}
+						}*
+						
 						/*console.log("Redrawed " + units_maker.length + ' marker');
 						$.each(units_maker, function(index,value) {
 							value["marker"].setDraggable(false);
@@ -402,12 +444,13 @@ function logica_gioco(response, textStatus, jqXHR)
 						}
 						break;
 					case 'defense':
-					//Imposto i marker a non draggabili		
-						if (units_maker.length == 0)
+					//Imposto i marker a non draggabili	
+						manageMarker(response, true);	
+						/*if (units_maker.length == 0)
 						{
 							console.log("Redraw");
 							drawMarkers(response,true);
-						}
+						}*/
 						
 						//Aggiungo all'interfaccia la scelta del numero di unità da attaccare
 						$('#result').empty();
@@ -446,11 +489,12 @@ function logica_gioco(response, textStatus, jqXHR)
 						break;
 					case 'attack/view_attack_result':
 							var view_result = '';
-							if (units_maker.length == 0)
+							manageMarker(response, true);
+							/*if (units_maker.length == 0)
 							{
 								//console.log("Redraw");
 								drawMarkers(response,true);
-							}
+							}*/
 							if (response.data.attack.attacker.result < 0)
 							{
 								view_result += "L'attaccante ha perso n. " + (-1*response.data.attack.attacker.result) + " unita'";
