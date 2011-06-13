@@ -237,7 +237,8 @@ function manageMarker(response, draggable)
 															'attacker_iso_country' : iso_code,
 															'defender_country': countryName,
 															"action":"attack"},
-													dataType: "json"
+													dataType: "json",
+													success: function() { getServerStatus();}
 													});
 											} else {
 												alert("Geocoder failed due to: " + status);
@@ -426,7 +427,10 @@ function logica_gioco(response, textStatus, jqXHR)
 									url : "index.php",
 									data: {'action':'attackers_unit_choose','choosen_units' : choosen_units,"game_logic":"1"},
 									dataType: "json",
-									success: function() { }
+									success: function()
+									{
+										
+									}
 									});
 									getServerStatus();
 							});
@@ -518,9 +522,30 @@ function logica_gioco(response, textStatus, jqXHR)
 					
 					case 'endgame':
 							$('#result').empty();
-							var view_result = 'Fine della partita';
+							manageMarker(response, false);
+							if (response.data.result == 'winner')
+								var view_result = 'Fine della partita - Hai vinto';
+							else if(response.data.result == 'loser')
+								var view_result = 'Sei stato sconfitto';
+							
 							$('#result').append(view_result);								
-						break;						
+						break;
+					case 'move_units':
+						$('#result').empty();
+					//	manageMarker(response, false);
+						
+						var fromCountry = $('<div><span>Country '+ response.data.move.from.name + '</span><span id="from_number">0</span></div>');
+						var toCountry = $('<div><span>Country '+ response.data.move.fo.name + '</span><span id="from_number">0</span></div>');
+						var moveUnits = $('<a id="plus_button" href="#">+</button>').button({
+						            icons: {
+					                primary: "ui-icon-plusthick"
+					            },
+					            text: false
+					        });
+						moveUnits.addClass('plus-button');
+						$('#result').append(fromCountry);
+						$('#result').append(moveUnits);
+						break;
 				}
 			
 		}

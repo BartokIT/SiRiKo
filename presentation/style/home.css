@@ -106,3 +106,17 @@ body
 {
 	text-align:left;
 }
+
+/*--------------- Mappa ----------------*/
+
+.plus-button
+{
+	width: 16px;
+	height: 24px;
+
+}
+
+.plus-button span
+{
+	top:0; left:0;
+}

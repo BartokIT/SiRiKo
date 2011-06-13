@@ -241,7 +241,8 @@ function get_countries_units_and_owner($game_id, $country_codes)
 	{
 		while ($row = mysql_fetch_row($result))
 		{
-			$info[$row[0]] = array("name" => $row[1], "gamer"=>$row[2], "units"=>$row[3]);
+			$name = explode(" ", $row[1]);
+			$info[$row[0]] = array("name" => $name[0], "gamer"=>$row[2], "units"=>$row[3]);
 		}
 	}
 	else

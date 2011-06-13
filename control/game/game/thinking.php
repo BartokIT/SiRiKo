@@ -49,7 +49,6 @@
 			$attacker_neighbors = get_country_neighbors_from_iso_code($attacker_iso_code);
 			$defender_country = get_country_code_and_owner($status["id_game"], $defender_country_name);
 			
-		
 			//Verifico se la nazione chiamata Ã¨ effettivamente vicina
 			$found = false;
 			foreach ($attacker_neighbors as $neighbor)
@@ -76,6 +75,26 @@
 			if ($attacker_country["units"] <= 1)
 			{
 				return new ReturnedArea("game", "game","thinking");
+				break;				
+			}
+
+			//Controllo se la nazione su cui ho mosso il marker e' nemica oppure e' dello stesso attaccante
+			if ($defender_country["owner"] == $player_order)
+			{
+				$status["data"]=array();
+				$status["data"]["move"]=array(
+				"from"=>array(
+				"iso_code"=> $attacker_iso_code,
+				 "name"=>$attacker_country["name"],
+				"units"=>$attacker_country["units"]),
+				 "to"=>array(
+				 "iso_code"=> $defender_country["iso_code"],
+				 "name"=>$defender_country_name,
+				"units"=>$defender_country["units"]));
+				
+				set_current_status($status["id_game"], "game", "move_units", serialize($status["data"]));
+				//Restituisci l'area per spostare le unità
+				return new ReturnedArea("game", "game","move_units");
 				break;				
 			}
 			
