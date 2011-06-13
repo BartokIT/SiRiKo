@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `game_status` (
   `gamer` int(11) NOT NULL,
   `status` varchar(20) NOT NULL,
   `substatus` varchar(20) NOT NULL,
-  `data` varchar(100) NOT NULL,
+  `data` varchar(500) NOT NULL,
   `game_name` varchar(30) NOT NULL,
   PRIMARY KEY (`id_game`),
   UNIQUE KEY `game_name` (`game_name`)

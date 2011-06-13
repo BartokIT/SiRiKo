@@ -242,6 +242,7 @@ class Flusso
 			
 				if ($ret_object instanceof ReturnedAjax)
 				{
+//					print_debug();
 					echo $ret_object->code;
 					die(); //dopo aver stampato la risposta non deve essere eseguito null'altro
 				}

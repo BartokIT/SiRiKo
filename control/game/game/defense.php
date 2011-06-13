@@ -33,6 +33,7 @@
 			$return = json_encode(array ('status'=>"game", "substatus"=>"defense", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
+			
 		case "roll_dice":
 			$player_order = get_gamer_order(session_id());
 			$status = get_current_turn_and_action(session_id());

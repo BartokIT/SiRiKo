@@ -9,7 +9,9 @@
 	{
 		default:
 		case "":
-			$status = get_current_turn_and_action(session_id());
+			return new ReturnedArea("game", "game", "thinking");
+			break;		
+			/*$status = get_current_turn_and_action(session_id());
 			
 			if ( $status["substatus"] != "thinking")
 				return new ReturnedArea("game", "game", $status["substatus"]);	
@@ -100,7 +102,7 @@
 			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
-		
+		*/
 
 	}
 

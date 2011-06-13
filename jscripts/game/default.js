@@ -41,9 +41,21 @@ function initialize() {
 
 	layer.setMap(map);
 
-
-	$('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
-	$('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
+	var console = $('<div id="console"><div id="user_info"></div></div>');
+	//$('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
+	$('#map_canvas').append(console);
+	$("#console" ).position({
+				of: $( "#map_canvas" ),
+				my: 'center bottom',
+				at: 'center bottom',
+				offset: '0 0 0 50'
+			});
+			
+	//Memorizzo i riferimenti alla parti principali della console di gioco
+	SiRiKo.console = {};
+	SiRiKo.console.user_info = $('#user_info');
+	
+//	$('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
 	window.setInterval(getServerStatus,5000);
 }
 /***** END INITIALIZE FUNCTION *****/
@@ -51,7 +63,7 @@ function initialize() {
 function getServerStatus()
 {
 		$.ajax({cache: false,
-		url : "index.php",
+		url : "",
 		data: {"game_logic":"1"},
 		dataType: "json",
 		success: logica_gioco
@@ -320,11 +332,19 @@ function getCountryNameFromPosition(results)
 	return countryName;
 }
 
+function drawUserInfo(response)
+{
+	var markerImage = '<img src="presentation/image/marker_player_' + response.user_info.order + '.png" />';
+		SiRiKo.console.user_info.append(markerImage);
+	SiRiKo.console.user_info.append(response.user_info.nickname);
+}
+
 function logica_gioco(response, textStatus, jqXHR)
 {	
 	if ( !check_same_status(previous_response,response))
 	{
-
+		//Disegno il cursore
+		drawUserInfo(response);
 		$('#result').empty();
 		switch (response.status)
 		{
@@ -402,6 +422,29 @@ function logica_gioco(response, textStatus, jqXHR)
 				{
 					case "thinking":
 							manageMarker(response, true);
+							if (response.data.gamer_turn)
+							{
+								$('#result').empty();
+								var passTurnButton = $('<a id="pass_button" href="#">Passa il turno</button>').button({
+										    icons: {
+									        secondary: "ui-icon-circle-arrow-e"
+									    }
+									}).click( function () {
+									
+										$.ajax({cache: false,
+											url : "index.php",
+											data: {'action':'pass_turn',
+												"game_logic":"1"},
+											dataType: "json",
+											success: function()
+											{
+												getServerStatus();
+											}
+											});
+									});		
+								 
+								 $('#result').append(passTurnButton);					
+							 }
 							break;
 					case "attacking":					
 						//Imposto i marker a non draggabili		
@@ -531,20 +574,99 @@ function logica_gioco(response, textStatus, jqXHR)
 							$('#result').append(view_result);								
 						break;
 					case 'move_units':
-						$('#result').empty();
-					//	manageMarker(response, false);
 						
-						var fromCountry = $('<div><span>Country '+ response.data.move.from.name + '</span><span id="from_number">0</span></div>');
-						var toCountry = $('<div><span>Country '+ response.data.move.fo.name + '</span><span id="from_number">0</span></div>');
-						var moveUnits = $('<a id="plus_button" href="#">+</button>').button({
-						            icons: {
-					                primary: "ui-icon-plusthick"
-					            },
-					            text: false
-					        });
-						moveUnits.addClass('plus-button');
-						$('#result').append(fromCountry);
-						$('#result').append(moveUnits);
+							$('#result').empty();
+							manageMarker(response, false);
+						if (response.data.gamer_turn)
+						{
+							var fromCountry = $('<div><span>Country '+ response.data.move.from.name + '</span><span id="from_number">' + response.data.move.from.units + '</span></div>');
+
+							var toCountry = $('<div><span>Country '+ response.data.move.to.name + '</span><span id="to_number">' + response.data.move.to.units + '</span></div>');
+							var moveUnitsPlus = $('<a id="plus_button" href="#"></button>').button({
+								        icons: {
+							            primary: "ui-icon-plus"
+							        },
+							        text: false
+							    }).click(function () {
+							    	var from_number = parseInt($('#from_number').text());
+							    	var to_number = parseInt($('#to_number').text());	
+							    	if (from_number > 1)
+							    	{
+							    		from_number = from_number - 1;
+							    		$('#from_number').text(from_number);
+							    		
+							    		to_number = to_number + 1;
+							    		$('#to_number').text(to_number);	
+							    	}
+							    });
+							    
+							var moveUnitsMinus = $('<a id="minus_button" href="#"></button>').button({
+								        icons: {
+							            primary: "ui-icon-minus"
+							        },
+							        text: false
+							    }).click(function () {
+							    	var from_number = parseInt($('#from_number').text());
+							    	var to_number = parseInt($('#to_number').text());	
+							    	if (to_number > 1)
+							    	{
+							    		from_number = from_number + 1;
+							    		$('#from_number').text(from_number);
+							    		
+							    		to_number = to_number - 1;
+							    		$('#to_number').text(to_number);	
+							    	}
+							    });			
+							
+							var okButton = $('<a id="ok_button" href="#">Conferma</button>').button({
+								        icons: {
+							            primary: "ui-icon-circle-check"
+							        }
+							    }).click( function () {
+
+							    	var from_number = parseInt($('#from_number').text());
+							    	var to_number = parseInt($('#to_number').text());	
+								
+									$.ajax({cache: false,
+										url : "index.php",
+										data: {'action':'confirm',
+											"game_logic":"1",
+											'from':from_number,
+											'to': to_number },
+											dataType: "json",
+										success: function()
+										{
+											getServerStatus();
+										}
+										});
+							    });
+							    
+							var cancelButton = $('<a id="cancel_button" href="#">Annulla</button>').button({
+								        icons: {
+							            primary: "ui-icon-circle-close"
+							        }
+							    }).click( function () {
+							    
+									$.ajax({cache: false,
+										url : "index.php",
+										data: {'action':'cancel',
+											"game_logic":"1"},
+										dataType: "json",
+										success: function()
+										{
+											getServerStatus();
+										}
+										});
+							    });
+							//moveUnits.addClass('plus-button');
+							$('#result').append(fromCountry);$('#result').append(toCountry);
+							$('#result').append(moveUnitsMinus);$('#result').append(moveUnitsPlus);
+							$('#result').append(okButton); $('#result').append(cancelButton);	
+						}
+						else
+						{
+							$('#result').append('<div>Il player x sta muovendo le unità</div>');
+						}					
 						break;
 				}
 			

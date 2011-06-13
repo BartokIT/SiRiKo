@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
   <title>Google Maps JavaScript API v3 Example: Fusion Tables Layer</title>
   
-  <!-- <link href="presentation/style/home.css"  rel="stylesheet" type="text/css" /> -->
+  <link href="presentation/style/view.css"  rel="stylesheet" type="text/css" /> 
   <link href="presentation/style/jquery-ui-1.8.13.custom.css"  rel="stylesheet" type="text/css" />
   <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
   

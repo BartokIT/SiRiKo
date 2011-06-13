@@ -4,6 +4,7 @@ body
 	color: white;
 	font-family: Verdana, Arial, Helvetica, sans-serif;	
 	font-size: 12px;
+	overflow: hidden;	
 }
 
 #background 
@@ -107,16 +108,3 @@ body
 	text-align:left;
 }
 
-/*--------------- Mappa ----------------*/
-
-.plus-button
-{
-	width: 16px;
-	height: 24px;
-
-}
-
-.plus-button span
-{
-	top:0; left:0;
-}

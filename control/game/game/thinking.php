@@ -108,16 +108,31 @@
 			set_current_status($status["id_game"], "game", "attack", serialize($status["data"]));
 			return new ReturnedArea("game", "game", "attack");
 			break;
-		case "get_neighbors":
-			$country_name = $_REQUEST["country_name"];
+		case "pass_turn":
+
 			$status = get_current_turn_and_action(session_id());
-			$country = get_country_neighbors($country_name);
-			$info = get_countries_units_and_owner($status["id_game"], $country);
-			$json_data=array();
-			$json_data["neighbors"]= $info;
+			$current_user = get_current_gamer();
+
+			if ($current_user == $status["current_gamer"])
+			{				
+				if (is_max_gamer())
+				{
+					//Prendo il giocatore con id piu basso
+					$first_gamer = get_first_gamer($status["id_game"]);
+					set_next_gamer($status["id_game"], $first_gamer["order"]);
+					
+					//Incremento il turno
+					set_next_turn();
+				}
+				else
+				{
+					//Prendo il prossimo partecipante e gli passo lo stato attivo
+					$next_gamer = get_next_gamer($status["id_game"], $current_user);
+					set_next_gamer($status["id_game"], $next_gamer);
+				}
+			}
 			
-			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
-			return new ReturnedAjax($return);
+			return new ReturnedArea("game", "game", "thinking");
 			break;
 		
 

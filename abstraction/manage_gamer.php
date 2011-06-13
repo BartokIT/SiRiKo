@@ -5,6 +5,30 @@ $table_name_participant="game_participants";
 $table_name_country = "game_country";
 $table_name_status = "game_status";
 */
+
+
+function get_gamer_info()
+{
+	global $table_name_participant;
+	$sql_string="SELECT p.porder, p.nickname FROM $table_name_participant p WHERE (p.user_session = \"". session_id() . "\")";	
+	$gamer_info = array();
+
+	$result = mysql_query($sql_string);
+	if ($result)
+	{
+		if ($row=mysql_fetch_row($result))
+		{
+			$gamer_info["nickname"] = $row[1];
+			$gamer_info["order"] = $row[0];			
+		}
+	}
+	else
+	{
+		die("#1 - [get_gamer_info] impossibile ottenere infomrazioni sul giocatore " . mysql_error());
+	}
+	
+	return $gamer_info;		
+}
 /**
 * Questa funzione restituisce l'elenco dei partecipanti alla partita
 */

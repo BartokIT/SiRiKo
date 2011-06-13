@@ -370,4 +370,44 @@ function get_game_status_from_user()
 	return $game_status;
 }
 
+function set_next_turn()
+{
+
+	global $table_name_participant;
+	global $table_name_status;
+
+	$game_round = -1;
+	$id_game = -1;
+	$user_id = mysql_escape_string(session_id());
+	$sql_string="SELECT s.round, s.id_game FROM $table_name_participant p, $table_name_status s WHERE (p.ext_game = s.id_game) AND (p.user_session =\"" . session_id() . "\" )";
+
+	$result = mysql_query($sql_string);	
+
+	if ($result)
+	{
+		if (mysql_num_rows($result))
+		{
+			$row = mysql_fetch_row($result);
+			$game_round=$row[0];
+			$id_game = $row[1];
+		}
+	}
+	else
+	{
+		die("#1 [set_next_turn] - impossibile ottenere lo stato della partita  " . mysql_error());
+	}	
+
+	$game_round = $game_round + 1;
+	
+	$sql_string = "UPDATE $table_name_status SET round=$game_round WHERE id_game=$id_game";
+	$result = mysql_query($sql_string);	
+
+	if (!$result)
+	{
+		die("#2 [set_next_turn] - impossibile cambiare il turno  " . mysql_error());	
+	}
+
+
+}
+
 ?>
