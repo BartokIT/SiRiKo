@@ -80,3 +80,12 @@ CREATE TABLE IF NOT EXISTS `game_status` (
   PRIMARY KEY (`id_game`),
   UNIQUE KEY `game_name` (`game_name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+
+INSERT INTO `game_country` (`iso_code`, `continent`, `neighbors`, `name`, `color`) VALUES
+('ITA', 'EU', 'FRA;CHE', 'Italy Italia', 1),
+('FRA', 'EU', 'DEU;ITA;ESP;CHE', 'France Francia', 2),
+('DEU', 'EU', 'FRA;CHE', 'Germany Germania', 4),
+('CHE', 'EU', 'ITA;FRA;DEU', 'Switzerland Svizzera', 3),
+('PRT', 'EU', 'ESP', 'Portugal Portogallo', 2),
+('ESP', 'EU', 'PRT;FRA', 'Spain Spagna', 1);
