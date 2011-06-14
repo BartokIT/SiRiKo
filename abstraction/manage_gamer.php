@@ -72,7 +72,7 @@ function get_co_gamers()
 	{
 		while ($row=mysql_fetch_row($result))
 		{
-			$array_games[$row[2]] = array("order"=> $row[2], "nickname"=> $row[1]);
+			$array_games[$row[1]] = array("order"=> $row[2], "nickname"=> $row[1]);
 		}
 	}
 	else

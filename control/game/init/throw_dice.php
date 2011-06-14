@@ -23,6 +23,12 @@
 				return new ReturnedArea("game", $game_info["status"],$game_info["substatus"]);
 			}
 			
+			//Controllo se non sono in un nuovo 
+			if ($game_info["substatus"] != "throw_dice")
+			{
+				return new ReturnedArea("game", "init", $game_info["substatus"]);
+			}
+						
 			if ($game_info["data"] != "")
 			{
 				$status_data = unserialize($game_info["data"]);
@@ -56,17 +62,18 @@
 			$game_info =get_game_status_from_user();
 			$current_user = get_current_gamer();
 			
-			
+			//Prova
+			$player_info = get_gamer_info();
 			//Inserisco il risultato del lancio nell'array
 			if ($game_info["data"] == "")
 			{
-				$status_data = array("dice"=>array( get_gamer_order(session_id())=>$roll));
+				$status_data = array("dice"=>array( $player_info["nickname"]=>$roll));
 				set_current_status($game_info["id_game"], "init", "throw_dice", serialize($status_data));
 			}
 			else
 			{
 				$status_data = unserialize($game_info["data"]);
-				$status_data["dice"][ get_gamer_order(session_id())] = $roll;
+				$status_data["dice"][$player_info["nickname"]] = $roll;
 				set_current_status($game_info["id_game"], "init", "throw_dice", serialize($status_data));
 			}
 
@@ -80,10 +87,13 @@
 				assign_country_and_units($game_info["id_game"], "EU");
 				$min_player = get_first_gamer($game_info["id_game"]);
 				
-				set_current_status($game_info["id_game"], "game", "thinking", serialize(array()),$min_player["order"], 0);
-				//echo "OK";
-				return new ReturnedArea("game", "game","thinking");
-				//return new ReturnedArea("game", "init", "throw_dice");
+//				set_current_status($game_info["id_game"], "game", "thinking", serialize(array()),$min_player["order"], 0);
+				set_current_status($game_info["id_game"], "init", "view_init_result", null,$min_player["order"], 0);
+	
+			//	return new ReturnedArea("game", "game","thinking");
+	
+				//Passo alla fase di visualizzazione dell'esito del gioco
+				return new ReturnedArea("game", "init", "view_init_result");				
 			}
 			else
 			{

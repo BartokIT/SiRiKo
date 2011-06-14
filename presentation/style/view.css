@@ -24,7 +24,7 @@ body
 #user_info
 {
 	float: left;
-	border: 1px solid black;
+/*	border: 1px solid black;*/
 	height: 100%;
 	width:110px;
 }
@@ -38,7 +38,7 @@ body
 #initialRoll
 {
 	float: left;
-	border: 1px solid black;
+	/*border: 1px solid black;*/
 	height: 100%;
 	width:110px;
 }

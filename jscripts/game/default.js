@@ -3,7 +3,7 @@ var units_maker= new Array();
 var SiRiKo = {};
 
 function initialize() {
-/*	
+
 	var chicago = new google.maps.LatLng(41.850033, 60.6500523);
 	var style =                                           
 	[ { featureType: "transit.station", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "transit.line", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.province", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.highway", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.land_parcel", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "all", elementType: "all", stylers: [ ] } ];
@@ -40,7 +40,7 @@ function initialize() {
 	});
 
 	layer.setMap(map);
-*/
+
 	var console = $('<div id="consoleContainer"></div>');
 	var leftConsoleBorder = $('<div></div>');
 	var rigthConsoleBorder = $('<div></div>');
@@ -344,57 +344,61 @@ function getCountryNameFromPosition(results)
 	return countryName;
 }
 
-function drawInitialRollDice(response, throw_dice, textMessage)
+function drawInitialRollDice(response, throw_dice, textMessage, view_result)
 {
-	var initialRoll = $('<div id="initialRoll"></div>');
-	var upperDiv = $('<div></div>');
-	var lowerDiv = $('<div>' + textMessage + '</div>');
-		
-	var rollImage = $('<img width="50px" src="presentation/image/die_' + response.user_info.order + '_big.png"/>');
-	upperDiv.css({'height': '80px', 'width':'100%', 'border': ' 1px solid red'});
-	upperDiv.css('cursor', 'hand');	
-	
-	lowerDiv.css({'width':'100%',
-	 'font-variant': 'small-caps',
-	 'text-align': 'center',
-	 'font-size': '1.2em',
-	 'margin': '0'
-	 });	
-	 
-	upperDiv.append(rollImage);
-
-	initialRoll.append(upperDiv);	
-	initialRoll.append(lowerDiv);
-	SiRiKo.console.console.append(initialRoll);
-	rollImage.position({
-				of: upperDiv,
-				my: 'center',
-				at: 'center',
-				offset: '0 0 0 0'
-			});	
-	SiRiKo.console.initialRoll = initialRoll;
-	//Counce per attirare l'attenzione
-	if (throw_dice)
+	if (view_result == undefined)
 	{
-		rollImage.effect("bounce", { times: 5, distance: 40 }, 400);
-		upperDiv.click(function(event) {
-			event.preventDefault();
-			$.ajax("index.php",
-			{ 
-				data: {'action': 'launch_die', "game_logic":"1" }
-			});
-			getServerStatus();
-		});
-	}
 	
+		var initialRoll = $('<div id="initialRoll"></div>');
+		var upperDiv = $('<div></div>');
+		var lowerDiv = $('<div>' + textMessage + '</div>');
+		
+		var rollImage = $('<img width="50px" src="presentation/image/die_' + response.user_info.order + '_big.png"/>');
+		upperDiv.css({'height': '80px', 'width':'100%'});
+		rollImage.css('cursor', 'pointer');	
+	
+		lowerDiv.css({'width':'100%',
+		 'font-variant': 'small-caps',
+		 'text-align': 'center',
+		 'font-size': '1.2em',
+		 'margin': '0'
+		 });	
+		 
+		upperDiv.append(rollImage);
+
+		initialRoll.append(upperDiv);	
+		initialRoll.append(lowerDiv);
+		SiRiKo.console.console.append(initialRoll);
+		rollImage.position({
+					of: upperDiv,
+					my: 'center',
+					at: 'center',
+					offset: '0 0 0 0'
+				});	
+		SiRiKo.console.initialRoll = initialRoll;
+		//Counce per attirare l'attenzione
+		if (throw_dice)
+		{
+			rollImage.effect("bounce", { times: 5, distance: 40 }, 400);
+			upperDiv.click(function(event) {
+				event.preventDefault();
+				$.ajax("index.php",
+				{ 
+					data: {'action': 'launch_die', "game_logic":"1" }
+				});
+				getServerStatus();
+			});
+		}
+	}
 		//Con questa visualizzo i dadi appena lanciati
-	if (response.data.dice)
+	if ((response.data.dice) && ($(response.data.dice).size() > 0))
 	{
 		var i=0;
-		var resultTable = '<div>Esito lancio dadi per l\'ordine gioco:<table><tr>';
+		var resultTable = '<div>Esito lancio dadi per l\'ordine di gioco:<table><tr>';
 		
 		$.each(response.data.dice, function(index,value)
 		{
+
 			resultTable +='<td>' + response.data.players_info[index].nickname + ': <img style="vertical-align: middle;" width="30px" src="presentation/image/die_' + value + '_big.png"/></td>';
 
 			i++;
@@ -407,7 +411,7 @@ function drawInitialRollDice(response, throw_dice, textMessage)
 			 'float': 'left',
 			 'font-variant': 'small-caps',
 			 'text-align': 'center',
-			 'font-size': '1.2em',
+			 'font-size': '1.4em',
 			 'margin': '15px'
 			 });	
 		SiRiKo.console.console.append(resultDiv);
@@ -441,17 +445,26 @@ function drawUserInterface(response)
 /**
 * Routine che disegna le informazioni sull'utente
 */
-function drawUserInfo(response)
+function drawUserInfo(response, force_redraw)
 {
-	if (!SiRiKo.console.hasOwnProperty('user_info'))
+	
+	if (!SiRiKo.console.hasOwnProperty('user_info') || (force_redraw != undefined))
 	{  
+		$('#user_info').empty();
+		console.log("Redrawed user info");
 		SiRiKo.console.user_info = $('#user_info');
 		
 //		var markerImage = '<img src="presentation/image/marker_player_' + response.user_info.order + '.png" />';
+
 		var userMarker = $('<div id="userMarker"></div>');
-		userMarker.css({
+
+		if (response.status == 'game')
+		{
+			//Imposto il marker solo se è in gioco
+			SiRiKo.console.userMarker = userMarker;		
+			userMarker.css({
 		'background': 'url("presentation/image/marker_player_' + response.user_info.order + '.png") no-repeat center bottom' });
-		
+		}
 		var userNickname = $('<div>' + response.user_info.nickname +'</div>');
 		userNickname.css({'width':'100%',
 		 'font-variant': 'small-caps',
@@ -543,7 +556,28 @@ function logica_gioco(response, textStatus, jqXHR)
 							}
 						//$('#result').append(gamer_status);	
 					}				
+				}				
+				else if (response.substatus == "view_init_result")
+				{
+					
+					drawInitialRollDice(response, false, '',true);
+
+					window.setTimeout(function()
+					{
+						$.ajax({cache: false,
+							url : "index.php",
+							data: {'action':'end_view',
+							"game_logic":"1"},
+							dataType: "json",
+							success : function()
+							{
+								drawUserInfo(response, true);
+							}
+							});
+							
+					}, 5000 );
 				}
+				
 				break;
 			case "game":
 				

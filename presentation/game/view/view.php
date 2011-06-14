@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-  <title>Google Maps JavaScript API v3 Example: Fusion Tables Layer</title>
+  <title>SiRiKo ... in game!</title>
   
   <link href="presentation/style/view.css"  rel="stylesheet" type="text/css" /> 
   <link href="presentation/style/jquery-ui-1.8.13.custom.css"  rel="stylesheet" type="text/css" />
