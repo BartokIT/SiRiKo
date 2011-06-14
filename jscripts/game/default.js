@@ -353,7 +353,7 @@ function drawInitialRollDice(response, throw_dice, textMessage, view_result)
 		var upperDiv = $('<div></div>');
 		var lowerDiv = $('<div>' + textMessage + '</div>');
 		
-		var rollImage = $('<img width="50px" src="presentation/image/die_' + response.user_info.order + '_big.png"/>');
+		var rollImage = $('<img width="50px" src="presentation/image/die_' + response.user_info.order + '_big2.png"/>');
 		upperDiv.css({'height': '80px', 'width':'100%'});
 		rollImage.css('cursor', 'pointer');	
 	
@@ -399,7 +399,7 @@ function drawInitialRollDice(response, throw_dice, textMessage, view_result)
 		$.each(response.data.dice, function(index,value)
 		{
 
-			resultTable +='<td>' + response.data.players_info[index].nickname + ': <img style="vertical-align: middle;" width="30px" src="presentation/image/die_' + value + '_big.png"/></td>';
+			resultTable +='<td>' + response.data.players_info[index].nickname + ': <img style="vertical-align: middle;" width="30px" src="presentation/image/die_' + value + '_big2.png"/></td>';
 
 			i++;
 		});
@@ -439,7 +439,24 @@ function clearAllRecipient()
 function drawUserInterface(response)
 {
 	clearAllRecipient();
+	if (!SiRiKo.console.hasOwnProperty('user_info'))
+	{  	
 	drawUserInfo(response);
+	}
+	
+	if (response.status == 'game')
+	{
+		var response = $('<div id="result"></div>');
+		response.css({
+			 'float': 'left',
+			 'font-variant': 'small-caps',
+			 'text-align': 'center',
+			 'font-size': '1.4em',
+			 'margin': '15px',
+			 'margin-top': '20px'
+			 });	
+		SiRiKo.console.console.append(response);
+	}
 }
 
 /**
@@ -448,8 +465,7 @@ function drawUserInterface(response)
 function drawUserInfo(response, force_redraw)
 {
 	
-	if (!SiRiKo.console.hasOwnProperty('user_info') || (force_redraw != undefined))
-	{  
+
 		$('#user_info').empty();
 		console.log("Redrawed user info");
 		SiRiKo.console.user_info = $('#user_info');
@@ -476,7 +492,7 @@ function drawUserInfo(response, force_redraw)
 		
 		SiRiKo.console.user_info.append(userMarker);
 		SiRiKo.console.user_info.append(userNickname);
-	}
+	
 }
 
 function logica_gioco(response, textStatus, jqXHR)
@@ -569,7 +585,7 @@ function logica_gioco(response, textStatus, jqXHR)
 							data: {'action':'end_view',
 							"game_logic":"1"},
 							dataType: "json",
-							success : function()
+							success : function(response, textStatus, jqXHR)
 							{
 								drawUserInfo(response, true);
 							}
@@ -618,15 +634,17 @@ function logica_gioco(response, textStatus, jqXHR)
 						$('#result').empty();
 						if (response.data.gamer_order == response.data.attack.attacker.player )
 						{
-							var choose_units_button = 'Scegli con quante unità attaccare<form action="#">';
+							var choose_units_button = 'Scegli con quante unità attaccare<form action="#"><div id="choosen_units">';
 							for ( i=1; (i <=  response.data.attack.attacker.available_units) && (i<=3);i++)
-								choose_units_button += '<input  type="radio" name="choosen_units" value="'+ i + '" /> ' + i + '<br />';
-							choose_units_button +='<input id="choose_units"type="submit" value="Scegli"/></form>';
+								choose_units_button += '<input id="choosen_units'+ i + '" type="radio" name="choosen_units" value="'+ i + '" /> <label for="choosen_units'+ i + '">' + i + '</label>';
+							choose_units_button +='<br/><input id="choose_units"type="submit" value="Scegli"/></div></form>';
 						
 
 
 							$('#result').append(choose_units_button);	
-							$('#choose_units').click(function(event) {
+							$('#choosen_units').buttonset();							
+							$('#choose_units').button({
+									}).click(function(event) {
 									var choosen_units = $("input[name='choosen_units']:checked").val();								
 									event.preventDefault();
 									$.ajax({cache: false,
@@ -669,7 +687,7 @@ function logica_gioco(response, textStatus, jqXHR)
 								choose_units_button +='<a id="choose_units" href="#">Procedi</a>';
 			
 							$('#result').append(choose_units_button);	
-							$('#choose_units').click(function(event) {
+							$('#choose_units').button().click(function(event) {
 									event.preventDefault();
 									$.ajax({cache: false,
 									url : "index.php",
@@ -742,9 +760,9 @@ function logica_gioco(response, textStatus, jqXHR)
 							manageMarker(response, false);
 						if (response.data.gamer_turn)
 						{
-							var fromCountry = $('<div><span>Country '+ response.data.move.from.name + '</span><span id="from_number">' + response.data.move.from.units + '</span></div>');
+							var fromCountry = $('<div><span>Numero di unità per '+ response.data.move.from.name + '</span>&nbsp;<span class="units_num" id="from_number">' + response.data.move.from.units + '</span></div>');
 
-							var toCountry = $('<div><span>Country '+ response.data.move.to.name + '</span><span id="to_number">' + response.data.move.to.units + '</span></div>');
+							var toCountry = $('<div><span>Numero di unità per  '+ response.data.move.to.name + '</span>&nbsp;<span class="units_num" id="to_number">' + response.data.move.to.units + '</span></div>');
 							var moveUnitsPlus = $('<a id="plus_button" href="#"></button>').button({
 								        icons: {
 							            primary: "ui-icon-plus"
