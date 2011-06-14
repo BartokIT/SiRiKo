@@ -10,7 +10,9 @@
 		default:
 		case "":
 			
-			$player_order = get_gamer_order(session_id());
+//			$player_order = get_gamer_order(session_id());
+			$player_info = get_gamer_info();
+			$player_order = $player_info["order"];
 			$status = get_current_turn_and_action(session_id());
 			$units= get_units_disposition($status["id_game"]);
 			$data  = unserialize($status["data"]);
@@ -32,7 +34,7 @@
 	/*	set_current_status($status["id_game"], "game", "thinking", serialize(array()));
 			return new ReturnedArea("game", "game","thinking");
 				break;				*/
-			$return = json_encode(array ('status'=>"game", "substatus"=>"move_units", "data"=>$json_data));
+			$return = json_encode(array ('user_info'=> $player_info, 'status'=>"game", "substatus"=>"move_units", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
 		case "cancel":

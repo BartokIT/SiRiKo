@@ -14,7 +14,9 @@
 			if ( $status["substatus"] != "thinking")
 				return new ReturnedArea("game", "game", $status["substatus"]);	
 				
-			$player_order = get_gamer_order(session_id());
+//			$player_order = get_gamer_order(session_id());
+			$player_info = get_gamer_info();
+			$player_order = $player_info["order"];
 			$units= get_units_disposition($status["id_game"]);
 
 			if ($player_order == $status["current_gamer"])
@@ -27,7 +29,7 @@
 			$json_data["gamer_turn"]=$currently_playing;
 			$json_data["gamer_order"]= (int) $player_order;
 			$json_data["units"]= $units;
-			$return = json_encode(array ('status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
+			$return = json_encode(array ('user_info'=> $player_info,'status'=>"game", "substatus"=>"thinking", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
 		case "attack":

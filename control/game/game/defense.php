@@ -11,7 +11,9 @@
 		case "":
 
 
-			$player_order = get_gamer_order(session_id());
+//			$player_order = get_gamer_order(session_id());
+			$player_info = get_gamer_info();
+			$player_order = $player_info["order"];
 			$status = get_current_turn_and_action(session_id());
 			$units= get_units_disposition($status["id_game"]);
 			$data  = unserialize($status["data"]);
@@ -30,7 +32,7 @@
 			$json_data["gamer_order"]= (int) $player_order;
 			$json_data["units"]= $units;
 			$json_data["attack"] =$data["attack"];
-			$return = json_encode(array ('status'=>"game", "substatus"=>"defense", "data"=>$json_data));
+			$return = json_encode(array ('user_info'=> $player_info, 'status'=>"game", "substatus"=>"defense", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
 			

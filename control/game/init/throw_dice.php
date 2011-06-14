@@ -15,7 +15,7 @@
 //			$player_order = get_gamer_order(session_id());
 			$player_info = get_gamer_info();
 			$player_order = $player_info["order"];
-			
+			$players_info = get_co_gamers();
 			$game_info = get_current_turn_and_action(session_id());
 			//Controllo se non sono in un nuovo 
 			if ($game_info["status"] != "init")
@@ -38,6 +38,7 @@
 			$json_data["gamer_turn"]=$currently_playing;
 			$json_data["gamer_order"]= (int) $player_order;
 			$json_data["dice"]=$status_data["dice"];
+			$json_data["players_info"]=$players_info;
 			//$json_data["dice"]["gamer"] =array_keys($status_data["dice"]);
 			//$json_data["dice"]["values"] =array_values($status_data["dice"]);
 			$return = json_encode(array ('user_info'=> $player_info, 'status'=>"init", "substatus"=>"throw_dice", "data"=>$json_data));

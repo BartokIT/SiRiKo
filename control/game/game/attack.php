@@ -9,7 +9,10 @@
 	{
 		default:
 		case "":
-			$player_order = get_gamer_order(session_id());
+//			$player_order = get_gamer_order(session_id());
+			$player_info = get_gamer_info();
+			$player_order = $player_info["order"];
+			
 			$status = get_current_turn_and_action(session_id());
 			$data  = unserialize($status["data"]);
 			
@@ -31,7 +34,7 @@
 			$json_data["gamer_order"]= (int) $player_order;
 			$json_data["units"]= $units;
 			$json_data["attack"] =$data["attack"];
-			$return = json_encode(array ('status'=>"game", "substatus"=>"attacking", "data"=>$json_data));
+			$return = json_encode(array ('user_info'=> $player_info, 'status'=>"game", "substatus"=>"attacking", "data"=>$json_data));
 			return new ReturnedAjax($return);
 			break;
 		case "attackers_unit_choose":

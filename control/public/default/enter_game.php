@@ -29,7 +29,7 @@ switch ($action)
 		$count = 1;
 		foreach ($games as $game)
 		{
-			if (($game_id === false) || ($game_id != $game["id"]))
+			if ((($game_id === false) || ($game_id != $game["id"])) && ($game["players"] <= 5))
 				$left_join_button = "<a class='join_button ui-button ui-widget ui-state-default ui-corner-all' href='". $game ["id"]."'>Join game</a>";
 			else
 				{
@@ -40,7 +40,7 @@ switch ($action)
 					}
 					else*/
 				//	print_r($first_gamer_info);
-					if ($first_gamer_info["user_session"] == session_id())
+					if (($first_gamer_info["user_session"] == session_id()) && ($game["players"] > 1) )
 						$left_join_button = "<a class='start_button ui-button ui-widget ui-state-default ui-corner-all' href='". $game ["id"]."'>Start game</a>";
 					else											
 						$left_join_button = "<a class='left_button ui-button ui-widget ui-state-default ui-corner-all' href='". $game ["id"]."'>Left game</a>";

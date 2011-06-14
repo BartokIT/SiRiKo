@@ -3,7 +3,7 @@ var units_maker= new Array();
 var SiRiKo = {};
 
 function initialize() {
-	
+/*	
 	var chicago = new google.maps.LatLng(41.850033, 60.6500523);
 	var style =                                           
 	[ { featureType: "transit.station", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "transit.line", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.province", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.highway", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.land_parcel", elementType: "all", stylers: [ { visibility: "off" } ] },{ featureType: "all", elementType: "all", stylers: [ ] } ];
@@ -40,20 +40,32 @@ function initialize() {
 	});
 
 	layer.setMap(map);
+*/
+	var console = $('<div id="consoleContainer"></div>');
+	var leftConsoleBorder = $('<div></div>');
+	var rigthConsoleBorder = $('<div></div>');
+	
+	rigthConsoleBorder.css({'width': '100%', 'height': '100%', 'background':'url("presentation/image/console_rxborder.png") no-repeat center right'});
+	leftConsoleBorder.css({'width': '100%', 'height': '100%', 'background':'url("presentation/image/console_sxborder.png") no-repeat center left'});
+	
+	console.append(rigthConsoleBorder);
+	rigthConsoleBorder.append(leftConsoleBorder);
+	leftConsoleBorder.append('<div id="console"><div id="user_info"></div></div>');
 
-	var console = $('<div id="console"><div id="user_info"></div></div>');
 	//$('#map_canvas').append('<div id="result" style="margin:auto; z-index: 13; position: absolute; cursor: pointer; background-color:white;width:250px;height:2500px"></div>');
 	$('#map_canvas').append(console);
-	$("#console" ).position({
+	
+	console.position({
 				of: $( "#map_canvas" ),
 				my: 'center bottom',
 				at: 'center bottom',
 				offset: '0 0 0 50'
 			});
 			
+	console.css({'background':'url("presentation/image/riskparchement.png") repeat top left'});
 	//Memorizzo i riferimenti alla parti principali della console di gioco
-	SiRiKo.console = {};
-	SiRiKo.console.user_info = $('#user_info');
+	SiRiKo.console = {console: $("#console" )};
+
 	
 //	$('#result').css({top:'50%',left:'50%',margin:'-'+($('#myDiv').height() / 2)+'px 0 0 -'+($('#myDiv').width() / 2)+'px'});
 	window.setInterval(getServerStatus,5000);
@@ -332,25 +344,140 @@ function getCountryNameFromPosition(results)
 	return countryName;
 }
 
+function drawInitialRollDice(response, throw_dice, textMessage)
+{
+	var initialRoll = $('<div id="initialRoll"></div>');
+	var upperDiv = $('<div></div>');
+	var lowerDiv = $('<div>' + textMessage + '</div>');
+		
+	var rollImage = $('<img width="50px" src="presentation/image/die_' + response.user_info.order + '_big.png"/>');
+	upperDiv.css({'height': '80px', 'width':'100%', 'border': ' 1px solid red'});
+	upperDiv.css('cursor', 'hand');	
+	
+	lowerDiv.css({'width':'100%',
+	 'font-variant': 'small-caps',
+	 'text-align': 'center',
+	 'font-size': '1.2em',
+	 'margin': '0'
+	 });	
+	 
+	upperDiv.append(rollImage);
+
+	initialRoll.append(upperDiv);	
+	initialRoll.append(lowerDiv);
+	SiRiKo.console.console.append(initialRoll);
+	rollImage.position({
+				of: upperDiv,
+				my: 'center',
+				at: 'center',
+				offset: '0 0 0 0'
+			});	
+	SiRiKo.console.initialRoll = initialRoll;
+	//Counce per attirare l'attenzione
+	if (throw_dice)
+	{
+		rollImage.effect("bounce", { times: 5, distance: 40 }, 400);
+		upperDiv.click(function(event) {
+			event.preventDefault();
+			$.ajax("index.php",
+			{ 
+				data: {'action': 'launch_die', "game_logic":"1" }
+			});
+			getServerStatus();
+		});
+	}
+	
+		//Con questa visualizzo i dadi appena lanciati
+	if (response.data.dice)
+	{
+		var i=0;
+		var resultTable = '<div>Esito lancio dadi per l\'ordine gioco:<table><tr>';
+		
+		$.each(response.data.dice, function(index,value)
+		{
+			resultTable +='<td>' + response.data.players_info[index].nickname + ': <img style="vertical-align: middle;" width="30px" src="presentation/image/die_' + value + '_big.png"/></td>';
+
+			i++;
+		});
+
+		resultTable += '</tr></table></div>';
+		var resultDiv = $(resultTable);
+				
+		resultDiv.css({
+			 'float': 'left',
+			 'font-variant': 'small-caps',
+			 'text-align': 'center',
+			 'font-size': '1.2em',
+			 'margin': '15px'
+			 });	
+		SiRiKo.console.console.append(resultDiv);
+		SiRiKo.console.diceResult = resultDiv;
+	}
+}
+
+/*
+* Cancello tutti i contenitori che dipendono dallo stato
+*/
+function clearAllRecipient()
+{
+	//Rimuovo la parte per il click dei dadi
+	if (SiRiKo.console.hasOwnProperty('initialRoll'))
+		SiRiKo.console.initialRoll.remove();
+
+	//Rimuovo la parte di visualizzazione dei dadi
+	if (SiRiKo.console.hasOwnProperty('diceResult'))
+		SiRiKo.console.diceResult.remove();		
+}
+
+/**
+* Routine che si occupa di disegnare l'interfaccia utente
+**/
+function drawUserInterface(response)
+{
+	clearAllRecipient();
+	drawUserInfo(response);
+}
+
+/**
+* Routine che disegna le informazioni sull'utente
+*/
 function drawUserInfo(response)
 {
-	var markerImage = '<img src="presentation/image/marker_player_' + response.user_info.order + '.png" />';
-		SiRiKo.console.user_info.append(markerImage);
-	SiRiKo.console.user_info.append(response.user_info.nickname);
+	if (!SiRiKo.console.hasOwnProperty('user_info'))
+	{  
+		SiRiKo.console.user_info = $('#user_info');
+		
+//		var markerImage = '<img src="presentation/image/marker_player_' + response.user_info.order + '.png" />';
+		var userMarker = $('<div id="userMarker"></div>');
+		userMarker.css({
+		'background': 'url("presentation/image/marker_player_' + response.user_info.order + '.png") no-repeat center bottom' });
+		
+		var userNickname = $('<div>' + response.user_info.nickname +'</div>');
+		userNickname.css({'width':'100%',
+		 'font-variant': 'small-caps',
+		 'text-align': 'center',
+		 'font-weight': 'bold',
+		 'font-size': '1.3em',
+		 'margin': '0'
+		 });
+		
+		SiRiKo.console.user_info.append(userMarker);
+		SiRiKo.console.user_info.append(userNickname);
+	}
 }
 
 function logica_gioco(response, textStatus, jqXHR)
 {	
 	if ( !check_same_status(previous_response,response))
 	{
-		//Disegno il cursore
-		drawUserInfo(response);
+		//Disegno la console
+		drawUserInterface(response);
 		$('#result').empty();
 		switch (response.status)
 		{
 			case "init":
 				//Se il sottostato è null devo iniziare la parte di lancio dei dati
-				if (response.substatus == null)
+				/*if (response.substatus == null)
 				{
 					var geocoder = new google.maps.Geocoder();
 					geocoder.geocode( { 'address': "Italy"}, function(results, status) {
@@ -376,20 +503,16 @@ function logica_gioco(response, textStatus, jqXHR)
 						});
 						}
 				} //Altrimenti se sono nel sottostato trow_dice ho iniziato la procedura di lancio dei dadi
-				else if (response.substatus == "throw_dice")
+				else*/
+				if (response.substatus == "throw_dice")
 				{
-					//Con questa visualizzo i dadi appena lanciati
-					if (response.data.dice)
-					{
-						$.each(response.data.dice, function(index,value)
-						{
-							$('#result').append('<div>Giocatore ' + index + ': ' + value + '</div>');
-						});
-					}
+
 					//Se è il turno di questo giocatore allora visualizzo il pulsante di lancio del dado			
 					if (response.data.gamer_turn)
 					{
-						var tira_dado_button = '<a id="launch_die" href="#">Lancia dado</a>';
+						var messages = 'Clicca sul dado per lanciarlo';
+						drawInitialRollDice(response, true, messages);
+						/*var tira_dado_button = '<a id="launch_die" href="#">Lancia dado</a>';
 						$('#result').append(tira_dado_button);	
 						$('#launch_die').click(function(event) {
 								event.preventDefault();
@@ -398,7 +521,7 @@ function logica_gioco(response, textStatus, jqXHR)
 									data: {'action': 'launch_die', "game_logic":"1" }
 								});
 								getServerStatus();
-							});
+							});*/
 					}
 					else
 					{
@@ -408,11 +531,17 @@ function logica_gioco(response, textStatus, jqXHR)
 	
 						if (response.data.dice[gamer_order])
 						{
-							gamer_status = "Attendi che tirino gli altri giocatori";
+							var messages = 'Attendi che tirino gli altri giocatori';
+							//gamer_status = "Attendi che tirino gli altri giocatori";
+								drawInitialRollDice(response, false, messages);
 						}
 						else
-							gamer_status = 'In attesa di lanciare il dado';
-						$('#result').append(gamer_status);	
+							{
+								var messages = 'Attendi per poter lanciare il dado';
+								drawInitialRollDice(response, false, messages);
+//								gamer_status = 'In attesa di lanciare il dado';
+							}
+						//$('#result').append(gamer_status);	
 					}				
 				}
 				break;

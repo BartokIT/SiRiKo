@@ -59,10 +59,12 @@ function get_gamers($id_game)
 /**
 * Questa funzione restituisce l'elenco dei co-partecipanti alla partita
 */
-function get_co_gamers($user_session_id)
+function get_co_gamers()
 {
+
+	$user_session_id = mysql_escape_string(session_id());
 	$table_name="game_participants";
-	$sql_string="SELECT s.user_session FROM $table_name t, $table_name s WHERE (t.ext_game = s.ext_game) AND (t.user_session=\"$user_session_id\")";
+	$sql_string="SELECT s.user_session, s.nickname, s.porder FROM $table_name t, $table_name s WHERE (t.ext_game = s.ext_game) AND (t.user_session=\"$user_session_id\")";
 	$array_games= array();
 	
 	$result = mysql_query($sql_string);
@@ -70,12 +72,12 @@ function get_co_gamers($user_session_id)
 	{
 		while ($row=mysql_fetch_row($result))
 		{
-			$array_games[] = $row[0];
+			$array_games[$row[2]] = array("order"=> $row[2], "nickname"=> $row[1]);
 		}
 	}
 	else
 	{
-		die("#1 - impossibile ottenere l'elenco dei co-partecipanti alla partita " . mysql_error());
+		die("#1 - [get_co_gamers] impossibile ottenere l'elenco dei co-partecipanti alla partita " . mysql_error());
 	}
 	
 	return $array_games;
